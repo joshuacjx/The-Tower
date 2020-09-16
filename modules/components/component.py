@@ -13,17 +13,23 @@ class Component:
         raise NotImplementedError
 
 
-class PlayerInputComponent(Component):
-    """Handles user input and modifies the state, velocity and position of the
-    player sprite."""
+class UserControlComponent(Component):
+    """Handles user input which modifies the state,
+    velocity and direction of the Entity sprite."""
 
     def __init__(self):
         super().__init__()
 
-    def update(self, player, *args):
+    def update(self, entity):
 
-        # TODO: Let Player store these as attributes. This is so
-        #  that different players can have different velocities.
+        # Keyboard constants
+        LEFT_KEY = pg.K_LEFT
+        RIGHT_KEY = pg.K_RIGHT
+        UP_KEY = pg.K_UP
+        DOWN_KEY = pg.K_DOWN
+        SPACE_KEY = pg.K_SPACE
+
+        # Velocity constants
         ZERO_VELOCITY = 0
         WALK_LEFT_VELOCITY = -180
         WALK_RIGHT_VELOCITY = 180
@@ -32,83 +38,90 @@ class PlayerInputComponent(Component):
         CLIMB_DOWN_VELOCITY = 180
 
         is_pressed = pg.key.get_pressed()
+        state = entity.get_state()
 
-        if player.state == EntityState.IDLE:
-            player.x_velocity = ZERO_VELOCITY
-            player.y_velocity = ZERO_VELOCITY
+        if state == EntityState.IDLE:
 
-            if is_pressed[pg.K_LEFT]:
-                player.state = EntityState.WALKING
-                player.direction = Direction.LEFT
-                player.x_velocity = WALK_LEFT_VELOCITY
+            entity.set_x_velocity(ZERO_VELOCITY)
+            entity.set_y_velocity(ZERO_VELOCITY)
 
-            if is_pressed[pg.K_RIGHT]:
-                player.state = EntityState.WALKING
-                player.direction = Direction.RIGHT
-                player.x_velocity = WALK_RIGHT_VELOCITY
+            if is_pressed[LEFT_KEY]:
+                entity.set_state(EntityState.WALKING)
+                entity.set_direction(Direction.LEFT)
+                entity.set_x_velocity(WALK_LEFT_VELOCITY)
 
-            if is_pressed[pg.K_SPACE]:
-                player.state = EntityState.JUMPING
-                player.y_velocity = JUMP_VELOCITY
-                player.message("JUMP")
+            if is_pressed[RIGHT_KEY]:
+                entity.set_state(EntityState.WALKING)
+                entity.set_direction(Direction.RIGHT)
+                entity.set_x_velocity(WALK_RIGHT_VELOCITY)
 
-        elif player.state == EntityState.WALKING:
-            if is_pressed[pg.K_LEFT]:
-                player.direction = Direction.LEFT
-                player.x_velocity = WALK_LEFT_VELOCITY
+            if is_pressed[SPACE_KEY]:
+                entity.set_state(EntityState.JUMPING)
+                entity.set_y_velocity(JUMP_VELOCITY)
+                entity.message("JUMP")
 
-            if is_pressed[pg.K_RIGHT]:
-                player.direction = Direction.RIGHT
-                player.x_velocity = WALK_RIGHT_VELOCITY
+        elif state == EntityState.WALKING:
 
-            if not (is_pressed[pg.K_LEFT] or is_pressed[pg.K_RIGHT]):
-                player.state = EntityState.IDLE
-                player.x_velocity = ZERO_VELOCITY
+            if is_pressed[LEFT_KEY]:
+                entity.set_direction(Direction.LEFT)
+                entity.set_x_velocity(WALK_LEFT_VELOCITY)
 
-            if is_pressed[pg.K_SPACE]:
-                player.state = EntityState.JUMPING
-                player.y_velocity = JUMP_VELOCITY
-                player.message("JUMP")
+            if is_pressed[RIGHT_KEY]:
+                entity.set_direction(Direction.RIGHT)
+                entity.set_x_velocity(WALK_RIGHT_VELOCITY)
 
-        elif player.state == EntityState.JUMPING:
-            if is_pressed[pg.K_LEFT]:
-                player.x_velocity = WALK_LEFT_VELOCITY
-                player.direction = Direction.LEFT
+            if not (is_pressed[LEFT_KEY] or is_pressed[RIGHT_KEY]):
+                entity.set_state(EntityState.IDLE)
+                entity.set_x_velocity(ZERO_VELOCITY)
 
-            if is_pressed[pg.K_RIGHT]:
-                player.x_velocity = WALK_RIGHT_VELOCITY
-                player.direction = Direction.RIGHT
+            if is_pressed[SPACE_KEY]:
+                entity.set_state(EntityState.JUMPING)
+                entity.set_y_velocity(JUMP_VELOCITY)
+                entity.message("JUMP")
 
-            if not (is_pressed[pg.K_LEFT] or is_pressed[pg.K_RIGHT]):
-                player.x_velocity = ZERO_VELOCITY
+        elif state == EntityState.JUMPING:
 
-        elif player.state == EntityState.HANGING:
-            player.x_velocity = ZERO_VELOCITY
-            player.y_velocity = ZERO_VELOCITY
+            if is_pressed[LEFT_KEY]:
+                entity.set_x_velocity(WALK_LEFT_VELOCITY)
+                entity.set_direction(Direction.LEFT)
 
-            if is_pressed[pg.K_UP] or is_pressed[pg.K_DOWN]:
-                player.state = EntityState.CLIMBING
+            if is_pressed[RIGHT_KEY]:
+                entity.set_x_velocity(WALK_RIGHT_VELOCITY)
+                entity.set_direction(Direction.RIGHT)
 
-            if is_pressed[pg.K_LEFT]:
-                player.direction = Direction.RIGHT
+            if not (is_pressed[LEFT_KEY] or is_pressed[RIGHT_KEY]):
+                entity.set_x_velocity(ZERO_VELOCITY)
 
-            if is_pressed[pg.K_RIGHT]:
-                player.direction = Direction.LEFT
+        elif state == EntityState.HANGING:
 
-            if is_pressed[pg.K_SPACE]:
-                player.state = EntityState.JUMPING
-                player.y_velocity = JUMP_VELOCITY
-                player.message("JUMP")
+            entity.set_x_velocity(ZERO_VELOCITY)
+            entity.set_y_velocity(ZERO_VELOCITY)
 
-        if player.state == EntityState.CLIMBING:
-            if is_pressed[pg.K_UP]:
-                player.y_velocity = CLIMB_UP_VELOCITY
+            if is_pressed[UP_KEY] or is_pressed[DOWN_KEY]:
+                entity.set_state(EntityState.CLIMBING)
 
-            if is_pressed[pg.K_DOWN]:
-                player.y_velocity = CLIMB_DOWN_VELOCITY
+            if is_pressed[LEFT_KEY]:
+                entity.set_direction(Direction.RIGHT)
 
-            if not (is_pressed[pg.K_UP] or is_pressed[pg.K_DOWN]):
-                player.state = EntityState.HANGING
+            if is_pressed[RIGHT_KEY]:
+                entity.set_direction(Direction.LEFT)
+
+            if is_pressed[SPACE_KEY]:
+                entity.set_state(EntityState.JUMPING)
+                entity.set_y_velocity(JUMP_VELOCITY)
+                entity.message("JUMP")
+
+        # TODO: Find out why elif and state cannot be used here
+        if entity.get_state() == EntityState.CLIMBING:
+
+            if is_pressed[UP_KEY]:
+                entity.set_y_velocity(CLIMB_UP_VELOCITY)
+
+            if is_pressed[DOWN_KEY]:
+                entity.set_y_velocity(CLIMB_DOWN_VELOCITY)
+
+            if not (is_pressed[UP_KEY] or is_pressed[DOWN_KEY]):
+                entity.set_state(EntityState.HANGING)
 
 
 class PlayerPhysicsComponent(Component):

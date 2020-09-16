@@ -1,7 +1,7 @@
 import pygame as pg
 from .entitystate import GameEvent, EntityState, Direction
 from .spritesheet import Spritesheet
-from modules.components.component import PlayerInputComponent, PlayerAnimationComponent, PlayerPhysicsComponent, \
+from modules.components.component import UserControlComponent, PlayerAnimationComponent, PlayerPhysicsComponent, \
                         SoundComponent, RenderComponent, EnemyDamageCollisionComponent, \
                         EnemyDamageCrushComponent
 
@@ -29,6 +29,7 @@ HOW TO MAKE A NEW ENEMY VARIANT
 
 class Entity(pg.sprite.Sprite):
     def __init__(self):
+        # TODO: Make velocity, direction and state information private
         super().__init__()
 
         # Defines the hitbox of the Entity. Must be redefined in the subclass.
@@ -46,6 +47,27 @@ class Entity(pg.sprite.Sprite):
 
     def update(self, *args):
         raise NotImplementedError
+
+    def message(self, message):
+        pass
+
+    # -- Velocity Setters -- #
+    def set_x_velocity(self, new_x_velocity):
+        self.x_velocity = new_x_velocity
+
+    def set_y_velocity(self, new_y_velocity):
+        self.y_velocity = new_y_velocity
+
+    # -- Direction Setter -- #
+    def set_direction(self, new_direction: Direction):
+        self.direction = new_direction
+
+    def get_state(self):
+        return self.state
+
+    # -- State Setter -- #
+    def set_state(self, new_state: EntityState):
+        self.state = new_state
 
 
 class Player(Entity):
@@ -83,7 +105,7 @@ class Player(Entity):
                         }
 
         # Components
-        self.input_component = PlayerInputComponent()
+        self.input_component = UserControlComponent()
         self.animation_component = PlayerAnimationComponent(animation_library, self.state)
         self.physics_component = PlayerPhysicsComponent()
         self.sound_component = SoundComponent(sound_library)
