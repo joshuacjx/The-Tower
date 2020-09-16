@@ -43,7 +43,7 @@ class UserControlComponent(Component):
         is_pressed = pg.key.get_pressed()
         state = entity.get_state()
 
-        if state == EntityState.IDLE:
+        if state is EntityState.IDLE:
 
             entity.set_x_velocity(ZERO_VELOCITY)
             entity.set_y_velocity(ZERO_VELOCITY)
@@ -63,7 +63,7 @@ class UserControlComponent(Component):
                 entity.set_y_velocity(JUMP_VELOCITY)
                 entity.message("JUMP")
 
-        elif state == EntityState.WALKING:
+        elif state is EntityState.WALKING:
 
             if is_pressed[LEFT_KEY]:
                 entity.set_direction(Direction.LEFT)
@@ -82,7 +82,7 @@ class UserControlComponent(Component):
                 entity.set_y_velocity(JUMP_VELOCITY)
                 entity.message("JUMP")
 
-        elif state == EntityState.JUMPING:
+        elif state is EntityState.JUMPING:
 
             if is_pressed[LEFT_KEY]:
                 entity.set_x_velocity(WALK_LEFT_VELOCITY)
@@ -95,7 +95,7 @@ class UserControlComponent(Component):
             if not (is_pressed[LEFT_KEY] or is_pressed[RIGHT_KEY]):
                 entity.set_x_velocity(ZERO_VELOCITY)
 
-        elif state == EntityState.HANGING:
+        elif state is EntityState.HANGING:
 
             entity.set_x_velocity(ZERO_VELOCITY)
             entity.set_y_velocity(ZERO_VELOCITY)
@@ -115,7 +115,7 @@ class UserControlComponent(Component):
                 entity.message("JUMP")
 
         # TODO: Find out why elif and state cannot be used here
-        if entity.get_state() == EntityState.CLIMBING:
+        if entity.get_state() is EntityState.CLIMBING:
 
             if is_pressed[UP_KEY]:
                 entity.set_y_velocity(CLIMB_UP_VELOCITY)
@@ -143,18 +143,17 @@ class PhysicsComponent(Component):
         colliding_sprites = pg.sprite.spritecollide(
             entity, map.collideable_terrain_group, False)
         for colliding_sprite in colliding_sprites:
-            if not colliding_sprite.is_spike:
-                if entity.is_colliding_from_below(colliding_sprite):
-                    entity.rect.top = colliding_sprite.rect.bottom
-                    entity.set_y_velocity(0)
+            if entity.is_colliding_from_below(colliding_sprite):
+                entity.rect.top = colliding_sprite.rect.bottom
+                entity.set_y_velocity(0)
             if entity.is_colliding_from_above(colliding_sprite):
                 isJumping = False
-                if entity.get_state() == EntityState.JUMPING:
+                if entity.get_state() is EntityState.JUMPING:
                     entity.set_state(EntityState.IDLE)
                 entity.rect.bottom = colliding_sprite.rect.top
                 entity.set_y_velocity(0)
-        if entity.get_state() != EntityState.CLIMBING \
-                and entity.get_state() != EntityState.HANGING:
+        if entity.get_state() is not EntityState.CLIMBING \
+                and entity.get_state() is not EntityState.HANGING:
             if isJumping:
                 entity.set_state(EntityState.JUMPING)
 
