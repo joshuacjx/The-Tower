@@ -1,7 +1,7 @@
 import pygame as pg
 from .entitystate import GameEvent, EntityState, Direction
 from .spritesheet import Spritesheet
-from .components import PlayerInputComponent, PlayerAnimationComponent, PlayerPhysicsComponent, \
+from modules.components.component import PlayerInputComponent, PlayerAnimationComponent, PlayerPhysicsComponent, \
                         SoundComponent, RenderComponent, EnemyDamageCollisionComponent, \
                         EnemyDamageCrushComponent
 

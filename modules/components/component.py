@@ -1,43 +1,11 @@
 import pygame as pg
-from .entitystate import EntityState, Direction
-
-"""
-* =============================================================== *
-* This module contains Components, which determine the behavior   *
-* of the entity which contains it.                                *
-* Most of these Components are reusable, as they do not contain   *
-* information on state.                                           *
-* The only stateful Component in this module is the component     *
-* controlling animations, as the state of the animation is unique *
-* to each instance of an Entity.                                  *
-* =============================================================== *
-
-RATIONALE
--------------------------
-Inheritance is a pain when dealing with complex objects, and runs the risk of 
-creating so-called "God objects" - objects which know too much about everything.
-This would result in a tightly-coupled system, which will be a pain to debug. 
-This also produces rather complicated inheritance trees, as objects inherit 
-from one another to determine its behaviour.
-
-To resolve this, we will use composition to determine the behaviour of entities.
-Behaviour code is now delegated to individual components held by the entity.
-
-Entity behaviour is now determined by what components it contains - rather than 
-what the entity is. This eliminates the need for complicated inheritance trees - 
-leaving us with a rather flat and easy-to-understand inheritance structure. This 
-also reduces the level of coupling - the Entity does not need to know how to do 
-Physics, or animate itself, et cetera. All these behaviours will now be handled 
-by resuable components.
-
-In this model, the Entity only needs to know information regarding its state - 
-where it is, what is its velocity, how much health it has left. It does not need 
-to know how to move itself, or how to animate itself. In short, the role of the 
-Entity is to act as a container for state.
-"""
+from modules.entitystate import EntityState, Direction
 
 
 class Component:
+    """Components determine the behavior of the entity which contains it.
+    Most Components are reusable, as they do not contain information on state."""
+
     def __init__(self):
         pass
 
@@ -45,90 +13,101 @@ class Component:
         raise NotImplementedError
 
 
-# -------------------- PLAYER COMPONENTS -------------------- #
 class PlayerInputComponent(Component):
+    """Handles user input and modifies the state, velocity and position of the
+    player sprite."""
+
     def __init__(self):
         super().__init__()
 
     def update(self, player, *args):
-        current_keys = pg.key.get_pressed()
+
+        # TODO: Let Player store these as attributes. This is so
+        #  that different players can have different velocities.
+        ZERO_VELOCITY = 0
+        WALK_LEFT_VELOCITY = -180
+        WALK_RIGHT_VELOCITY = 180
+        JUMP_VELOCITY = -750
+        CLIMB_UP_VELOCITY = -120
+        CLIMB_DOWN_VELOCITY = 180
+
+        is_pressed = pg.key.get_pressed()
 
         if player.state == EntityState.IDLE:
-            # Resolves the bug of player sliding along surface when idle
-            player.x_velocity = 0
-            player.y_velocity = 0
+            player.x_velocity = ZERO_VELOCITY
+            player.y_velocity = ZERO_VELOCITY
 
-            if current_keys[pg.K_LEFT]:
+            if is_pressed[pg.K_LEFT]:
                 player.state = EntityState.WALKING
                 player.direction = Direction.LEFT
-                player.x_velocity = -180
+                player.x_velocity = WALK_LEFT_VELOCITY
 
-            if current_keys[pg.K_RIGHT]:
+            if is_pressed[pg.K_RIGHT]:
                 player.state = EntityState.WALKING
                 player.direction = Direction.RIGHT
-                player.x_velocity = 180
+                player.x_velocity = WALK_RIGHT_VELOCITY
 
-            if current_keys[pg.K_SPACE]:
+            if is_pressed[pg.K_SPACE]:
                 player.state = EntityState.JUMPING
-                player.y_velocity = -750
+                player.y_velocity = JUMP_VELOCITY
                 player.message("JUMP")
 
         elif player.state == EntityState.WALKING:
-            if current_keys[pg.K_LEFT]:
-                player.x_velocity = -180
+            if is_pressed[pg.K_LEFT]:
                 player.direction = Direction.LEFT
+                player.x_velocity = WALK_LEFT_VELOCITY
 
-            if current_keys[pg.K_RIGHT]:
-                player.x_velocity = 180
+            if is_pressed[pg.K_RIGHT]:
                 player.direction = Direction.RIGHT
+                player.x_velocity = WALK_RIGHT_VELOCITY
 
-            if not (current_keys[pg.K_LEFT] or current_keys[pg.K_RIGHT]):
+            if not (is_pressed[pg.K_LEFT] or is_pressed[pg.K_RIGHT]):
                 player.state = EntityState.IDLE
-                player.x_velocity = 0
+                player.x_velocity = ZERO_VELOCITY
 
-            if current_keys[pg.K_SPACE]:
+            if is_pressed[pg.K_SPACE]:
                 player.state = EntityState.JUMPING
-                player.y_velocity = -750
+                player.y_velocity = JUMP_VELOCITY
                 player.message("JUMP")
 
         elif player.state == EntityState.JUMPING:
-            if current_keys[pg.K_LEFT]:
-                player.x_velocity = -180
+            if is_pressed[pg.K_LEFT]:
+                player.x_velocity = WALK_LEFT_VELOCITY
                 player.direction = Direction.LEFT
 
-            if current_keys[pg.K_RIGHT]:
-                player.x_velocity = 180
+            if is_pressed[pg.K_RIGHT]:
+                player.x_velocity = WALK_RIGHT_VELOCITY
                 player.direction = Direction.RIGHT
 
-            if not (current_keys[pg.K_LEFT] or current_keys[pg.K_RIGHT]):
-                player.x_velocity = 0
+            if not (is_pressed[pg.K_LEFT] or is_pressed[pg.K_RIGHT]):
+                player.x_velocity = ZERO_VELOCITY
 
         elif player.state == EntityState.HANGING:
-            player.x_velocity = 0
-            player.y_velocity = 0
+            player.x_velocity = ZERO_VELOCITY
+            player.y_velocity = ZERO_VELOCITY
 
-            if current_keys[pg.K_UP] or current_keys[pg.K_DOWN]:
+            if is_pressed[pg.K_UP] or is_pressed[pg.K_DOWN]:
                 player.state = EntityState.CLIMBING
 
-            if current_keys[pg.K_LEFT]:
+            if is_pressed[pg.K_LEFT]:
                 player.direction = Direction.RIGHT
 
-            if current_keys[pg.K_RIGHT]:
+            if is_pressed[pg.K_RIGHT]:
                 player.direction = Direction.LEFT
 
-            if current_keys[pg.K_SPACE]:
+            if is_pressed[pg.K_SPACE]:
                 player.state = EntityState.JUMPING
-                player.y_velocity = -750
+                player.y_velocity = JUMP_VELOCITY
                 player.message("JUMP")
 
         if player.state == EntityState.CLIMBING:
-            if current_keys[pg.K_UP]:
-                player.y_velocity = -120
+            if is_pressed[pg.K_UP]:
+                player.y_velocity = CLIMB_UP_VELOCITY
 
-            if current_keys[pg.K_DOWN]:
-                player.y_velocity = 180
+            if is_pressed[pg.K_DOWN]:
+                player.y_velocity = CLIMB_DOWN_VELOCITY
 
-            if not (current_keys[pg.K_UP] or current_keys[pg.K_DOWN]):
+            if not (is_pressed[pg.K_UP] or is_pressed[pg.K_DOWN]):
                 player.state = EntityState.HANGING
 
 
@@ -241,6 +220,10 @@ class SimpleAnimationComponent(Component):
 
 
 class PlayerAnimationComponent(Component):
+    """The only stateful Component in this module is the component
+    controlling animations, as the state of the animation is unique
+    to each instance of an Entity."""
+
     def __init__(self, animation_sequences, state: EntityState):
         super().__init__()
 
@@ -452,5 +435,3 @@ class EnemyDamageCrushComponent(Component):
         for colliding_sprite in pg.sprite.spritecollide(entity, map.collideable_terrain_group, False):
             if colliding_sprite.rect.bottom < entity.rect.centery:
                 entity.take_damage(100)
-
-

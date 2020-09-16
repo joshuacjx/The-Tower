@@ -3,7 +3,7 @@ import json
 from modules.block import Block, FallingBlock, PushableBlock, LadderBlock, SpikeBlock, GatewayBlock, Coin
 from modules.entities import Enemy, PinkGuy, TrashMonster, ToothWalker
 from modules.entitystate import GameEvent, EntityState
-from modules.components import PlayerPhysicsComponent, RenderComponent, EnemyAIInputComponent, EnemyPhysicsComponent
+from modules.components.component import RenderComponent, EnemyAIInputComponent, EnemyPhysicsComponent
 from modules.textureset import TextureSet
 
 """
