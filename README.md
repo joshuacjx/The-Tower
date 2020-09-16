@@ -5,4 +5,4 @@ The Tower is a 2D side-scrolling platformer game implemented by You Fing Feng an
 - [Detailed README Document](https://docs.google.com/document/d/1WW6_1X0VommSeOCSJUUX3Dozna7qWd3olFUfxWsVnrE/edit#heading=h.ok3dqohg3psi)
 - [Project Poster](https://i.ibb.co/WzFdx7z/2367.jpg)
 - [Project Video](https://youtu.be/aReTBS2zsNs)
-- Windows Executable(https://github.com/youyingfeng/recursivesandwich/releases/tag/1.0)
+- [Windows Executable](https://github.com/youyingfeng/recursivesandwich/releases/tag/1.0)
