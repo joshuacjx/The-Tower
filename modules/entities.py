@@ -1,7 +1,7 @@
 import pygame as pg
 from .entitystate import GameEvent, EntityState, Direction
 from .spritesheet import Spritesheet
-from modules.components.component import UserControlComponent, PlayerAnimationComponent, PlayerPhysicsComponent, \
+from modules.components.component import UserControlComponent, PlayerAnimationComponent, PhysicsComponent, \
                         SoundComponent, RenderComponent, EnemyDamageCollisionComponent, \
                         EnemyDamageCrushComponent
 
@@ -28,21 +28,17 @@ HOW TO MAKE A NEW ENEMY VARIANT
 
 
 class Entity(pg.sprite.Sprite):
+
     def __init__(self):
         # TODO: Make velocity, direction and state information private
         super().__init__()
 
-        # Defines the hitbox of the Entity. Must be redefined in the subclass.
-        self.rect = None                   
+        """Defines the position of the entity."""
+        self.rect = None
 
-        # Velocities
         self.x_velocity = 0              
         self.y_velocity = 0
-
-        # Direction which the Entity is facing
         self.direction = Direction.RIGHT
-
-        # State of the entity  
         self.state = EntityState.IDLE
 
     def update(self, *args):
@@ -62,12 +58,27 @@ class Entity(pg.sprite.Sprite):
     def set_direction(self, new_direction: Direction):
         self.direction = new_direction
 
+    # -- State Getter -- #
     def get_state(self):
         return self.state
 
     # -- State Setter -- #
     def set_state(self, new_state: EntityState):
         self.state = new_state
+
+    # -- Collision Information -- #
+    def is_colliding_from_below(self, colliding_sprite):
+        return colliding_sprite.rect.top < self.rect.top < colliding_sprite.rect.bottom
+
+    def is_colliding_from_above(self, colliding_sprite):
+        return colliding_sprite.rect.top < self.rect.bottom < colliding_sprite.rect.bottom
+
+    def is_colliding_from_right(self, colliding_sprite):
+        return colliding_sprite.rect.left < self.rect.left < colliding_sprite.rect.right
+
+    def is_colliding_from_left(self, colliding_sprite):
+        return colliding_sprite.rect.left < self.rect.right < colliding_sprite.rect.right
+
 
 
 class Player(Entity):
@@ -107,7 +118,7 @@ class Player(Entity):
         # Components
         self.input_component = UserControlComponent()
         self.animation_component = PlayerAnimationComponent(animation_library, self.state)
-        self.physics_component = PlayerPhysicsComponent()
+        self.physics_component = PhysicsComponent()
         self.sound_component = SoundComponent(sound_library)
         self.render_component = RenderComponent()
 

@@ -34,7 +34,8 @@ def main() -> None:
 
     # -------------------- GAME LOOP -------------------- #
     while run:
-        # gets the delta time, capped at 60 fps
+        """Delta time refers to the time difference between the 
+        previous frame that was drawn and the current frame"""
         delta_time = clock.tick(60) / 1000
 
         # Directs the scene to process events in the queue, update its state and render onto the window
