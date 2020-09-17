@@ -295,9 +295,6 @@ class SoundComponent(Component):
         super().__init__()
         self.sounds = sounds
 
-    def update(self, *args):
-        pass
-
     def receive(self, message):
         if message is "JUMP":
             self.sounds["JUMP"].play()
@@ -327,92 +324,26 @@ class EnemyAIInputComponent(Component):
                 entity.x_velocity = -90
 
 
-class EnemyPhysicsComponent(Component):
+class EnemyPhysicsComponent(PhysicsComponent):
     def __init__(self):
         super().__init__()
-        self.gravity = 60  # because 60 * delta time gives 0 occasionally, which makes entity change state
-        # due to the game thinking that it is jumping
-        self.DISCRETE_TIMESTEP = 1 / 60  # This is important for framerate independence
 
-    def update(self, delta_time, entity, game_map):
-        # simulate multiple timesteps
-        num_full_steps = int(delta_time / self.DISCRETE_TIMESTEP)
-        remainder_time = delta_time % self.DISCRETE_TIMESTEP
-
-        for i in range(0, num_full_steps):
-            if entity.state != EntityState.CLIMBING and entity.state != EntityState.HANGING:
-                entity.y_velocity += int(self.gravity * self.DISCRETE_TIMESTEP * 60)
-
-            # Handle collisions in y-axis
-            entity.rect.y += int(entity.y_velocity * self.DISCRETE_TIMESTEP)
-            isJumping = True
-            for colliding_sprite in pg.sprite.spritecollide(entity, game_map.collideable_terrain_group, False):
-                if not colliding_sprite.is_spike:
-                    if colliding_sprite.rect.top < entity.rect.top < colliding_sprite.rect.bottom:
-                        entity.rect.top = colliding_sprite.rect.bottom
-                        entity.y_velocity = 0
-                if colliding_sprite.rect.top < entity.rect.bottom < colliding_sprite.rect.bottom:
-                    isJumping = False
-                    if entity.state == EntityState.JUMPING:
-                        entity.state = EntityState.IDLE
-                    entity.rect.bottom = colliding_sprite.rect.top
-                    entity.y_velocity = 0
-            if isJumping:
-                entity.state = EntityState.JUMPING
-
-            # Handle collisions in x-axis
-            entity.rect.x += int(entity.x_velocity * self.DISCRETE_TIMESTEP)
-            for colliding_sprite in pg.sprite.spritecollide(entity, game_map.collideable_terrain_group, False):
-                if not colliding_sprite.is_spike:
-                    if colliding_sprite.rect.left < entity.rect.left < colliding_sprite.rect.right:
-                        entity.rect.left = colliding_sprite.rect.right
-                        entity.direction = Direction.RIGHT
-                        entity.x_velocity = -entity.x_velocity
-
-                    if colliding_sprite.rect.left < entity.rect.right < colliding_sprite.rect.right:
-                        entity.rect.right = colliding_sprite.rect.left
-                        entity.direction = Direction.LEFT
-                        entity.x_velocity = -entity.x_velocity
-
-        # lerps the remainder and run simulation one last time
-        entity.y_velocity += int(self.gravity * remainder_time * 60)
-
-        # Handles collisions along the y axis next
-        # Positions the entity at its future position
-        entity.rect.y += int(entity.y_velocity * remainder_time)
-        if int(entity.y_velocity * remainder_time) != 0:
-            isJumping = True
-            for colliding_sprite in pg.sprite.spritecollide(entity, game_map.collideable_terrain_group, False):
-                if not colliding_sprite.is_spike:
-                    if colliding_sprite.rect.top < entity.rect.top < colliding_sprite.rect.bottom:
-                        entity.rect.top = colliding_sprite.rect.bottom
-                        entity.y_velocity = 0
-                if colliding_sprite.rect.top < entity.rect.bottom < colliding_sprite.rect.bottom:
-                    isJumping = False
-                    if entity.state == EntityState.JUMPING:
-                        entity.state = EntityState.IDLE
-                    entity.rect.bottom = colliding_sprite.rect.top
-                    entity.y_velocity = 0
-            if isJumping:
-                entity.state = EntityState.JUMPING
-
-        # Handle collisions along x-axis next
-        entity.rect.x += int(entity.x_velocity * remainder_time)
-        for colliding_sprite in pg.sprite.spritecollide(entity, game_map.collideable_terrain_group, False):
+    @staticmethod
+    def handle_x_collisions(enemy, map):
+        """Handles collisions between the enemy and the terrain along the x-axis.
+        Enemies would reverse its direction and velocity upon collision with a sprite."""
+        colliding_sprites = pg.sprite.spritecollide(
+            enemy, map.collideable_terrain_group, False)
+        for colliding_sprite in colliding_sprites:
             if not colliding_sprite.is_spike:
-                if colliding_sprite.rect.left < entity.rect.left < colliding_sprite.rect.right:
-                    entity.rect.left = colliding_sprite.rect.right
-                if colliding_sprite.rect.left < entity.rect.right < colliding_sprite.rect.right:
-                    entity.rect.right = colliding_sprite.rect.left
-
-        # Then keeps everything within map boundaries
-        map_width = game_map.rect.width
-        if entity.rect.top < 0:
-            entity.rect.top = 0
-        if entity.rect.left < 0:
-            entity.rect.left = 0
-        elif entity.rect.right > map_width:
-            entity.rect.right = map_width
+                if enemy.is_colliding_from_right(colliding_sprite):
+                    enemy.rect.left = colliding_sprite.rect.right
+                    enemy.set_direction(Direction.RIGHT)
+                    enemy.x_velocity = -enemy.x_velocity
+                if enemy.is_colliding_from_left(colliding_sprite):
+                    enemy.rect.right = colliding_sprite.rect.left
+                    enemy.set_direction(Direction.LEFT)
+                    enemy.x_velocity = -enemy.x_velocity
 
 
 class EnemyDamageCollisionComponent(Component):
