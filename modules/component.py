@@ -11,7 +11,10 @@ class Component:
         pass
 
     def update(self, *args):
-        raise NotImplementedError
+        pass
+
+    def receive(self, message):
+        pass
 
 
 class UserControlComponent(Component):
@@ -191,22 +194,20 @@ class PhysicsComponent(Component):
         remainder_time = delta_time % DISCRETE_TIMESTEP
 
         for i in range(0, num_full_steps):
-            if entity.state != EntityState.CLIMBING and entity.state != EntityState.HANGING:
+            if entity.get_state() is not EntityState.CLIMBING \
+                    and entity.get_state() is not EntityState.HANGING:
                 entity.y_velocity += int(self.GRAVITY * DISCRETE_TIMESTEP * 60)
-
             entity.rect.y += int(entity.y_velocity * DISCRETE_TIMESTEP)
             self.handle_y_collisions(entity, game_map)
-
             entity.rect.x += int(entity.x_velocity * DISCRETE_TIMESTEP)
             self.handle_x_collisions(entity, game_map)
 
-        if entity.state != EntityState.CLIMBING and entity.state != EntityState.HANGING:
+        if entity.get_state() is not EntityState.CLIMBING \
+                and entity.get_state() is not EntityState.HANGING:
             entity.y_velocity += int(self.GRAVITY * remainder_time * 60)
-
         entity.rect.y += int(entity.y_velocity * remainder_time)
         if int(entity.y_velocity * remainder_time) != 0:
             self.handle_y_collisions(entity, game_map)
-
         entity.rect.x += int(entity.x_velocity * remainder_time)
         self.handle_x_collisions(entity, game_map)
 
@@ -292,17 +293,15 @@ class RenderComponent(Component):
 class SoundComponent(Component):
     def __init__(self, sounds):
         super().__init__()
-        self.state = None
         self.sounds = sounds
 
     def update(self, *args):
         pass
 
     def receive(self, message):
-        if message == "JUMP":
-            # also stop walking sound playback
+        if message is "JUMP":
             self.sounds["JUMP"].play()
-        elif message == "HIT":
+        elif message is "HIT":
             self.sounds["HIT"].play()
 
 
@@ -414,18 +413,6 @@ class EnemyPhysicsComponent(Component):
             entity.rect.left = 0
         elif entity.rect.right > map_width:
             entity.rect.right = map_width
-
-
-class EnemyAdvancedAIInputComponent(Component):
-    """Allows the enemy to chase the target within the boundaries of its own island."""
-
-    def __init__(self):
-        super().__init__()
-
-    def update(self, entity, game_map):
-        # Assume I have already generated the Floyd-Warshall array
-        #
-        pass
 
 
 class EnemyDamageCollisionComponent(Component):
