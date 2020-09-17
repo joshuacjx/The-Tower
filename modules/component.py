@@ -360,8 +360,6 @@ class EnemyPhysicsComponent(PhysicsComponent):
 
 class EnemyDamageComponent(Component):
     """Handles the situations in which the enemy would take damage in health."""
-    # TODO: Implement a component for player to take
-    #  damage (20) when its rect collides with enemy's rect
 
     def __init__(self, enemy):
         super().__init__()
@@ -372,12 +370,15 @@ class EnemyDamageComponent(Component):
         self.take_damage_if_crushed_by_terrain(map)
 
     def take_damage_if_stomped_by_player(self, player):
-        is_stomped_by_player = \
-            self.enemy.rect.colliderect(player.rect) \
-            and (player.rect.bottom < self.enemy.rect.centery
-                 and player.y_velocity > 0)
-        if is_stomped_by_player:
-            self.enemy.take_damage(100)
+        has_collided_with_player = self.enemy.rect.colliderect(player.rect)
+        if has_collided_with_player:
+            is_stomped_by_player = player.rect.bottom < self.enemy.rect.centery \
+                                   and player.y_velocity > 0
+            if is_stomped_by_player:
+                self.enemy.take_damage(100)
+            else:
+                # TODO: Abstract all player damage logic into a Component
+                player.take_damage(20)
 
     def take_damage_if_crushed_by_terrain(self, map):
         colliding_sprites = pg.sprite.spritecollide(

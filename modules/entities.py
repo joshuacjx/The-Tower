@@ -164,8 +164,6 @@ class Player(Entity):
         return self.last_collide_time > pg.time.get_ticks() - 500
 
     def message(self, message):
-        # Apart from sound, can force animation to receive animations too
-        # But it is too much work to do animation, so we will not do that
         self.sound_component.receive(message)
 
     def handle_input(self):
