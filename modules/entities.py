@@ -2,8 +2,7 @@ import pygame as pg
 from .entitystate import GameEvent, EntityState, Direction
 from .spritesheet import Spritesheet
 from modules.component import UserControlComponent, EntityAnimationComponent, PhysicsComponent, \
-                        SoundComponent, RenderComponent, EnemyDamageCollisionComponent, \
-                        EnemyDamageCrushComponent
+                        SoundComponent, RenderComponent, EnemyDamageComponent
 
 """
 * =============================================================== *
@@ -36,6 +35,10 @@ class Entity(pg.sprite.Sprite):
 
     def __init__(self):
         # TODO: Make velocity, direction and state information private
+        # TODO: Entities should have methods that support the modification
+        #  of its attributes. Components should call these methods instead
+        #  of directly accessing these attributes.
+
         super().__init__()
 
         # Defines the entity's position
@@ -56,11 +59,11 @@ class Entity(pg.sprite.Sprite):
     def set_x_velocity(self, new_x_velocity):
         self.x_velocity = new_x_velocity
 
-    def set_y_velocity(self, new_y_velocity):
-        self.y_velocity = new_y_velocity
-
     def reverse_x_velocity(self):
         self.x_velocity = -self.x_velocity
+
+    def set_y_velocity(self, new_y_velocity):
+        self.y_velocity = new_y_velocity
 
     def get_direction(self):
         return self.direction
@@ -91,7 +94,6 @@ class Entity(pg.sprite.Sprite):
 
     def is_colliding_from_left(self, colliding_sprite):
         return colliding_sprite.rect.left < self.rect.right < colliding_sprite.rect.right
-
 
 
 class Player(Entity):
@@ -139,9 +141,9 @@ class Player(Entity):
         # Current Image
         self.image = self.animation_component.get_current_image()
 
-    # TODO: Abstract the damage logic into a component
     def take_damage(self, damage):
         """Decreases the health of the player by the specified amount"""
+        # TODO: Abstract the damage logic into a component
         if self.is_immune():
             return
         else:
@@ -207,8 +209,7 @@ class Enemy(Entity):
         self.physics_component = physics_component
         self.render_component = render_component
 
-        self.damage_collide_component = EnemyDamageCollisionComponent()
-        self.damage_crush_component = EnemyDamageCrushComponent()
+        self.damage_component = EnemyDamageComponent(self)
 
         # Animation and sound are taken from a type object
         self.animation_component = EntityAnimationComponent(self, type_object.animation_library)
@@ -234,8 +235,7 @@ class Enemy(Entity):
     def update(self, delta_time, map, player):
         self.input_component.update(self)
         self.physics_component.update(delta_time, self, map)
-        self.damage_collide_component.update(self, player)
-        self.damage_crush_component.update(self, map)
+        self.damage_component.update(player, map)
         self.animation_component.update()
 
     def render(self, camera, surface):

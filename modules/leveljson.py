@@ -230,5 +230,3 @@ class EnemyManager:
     def render(self, camera, surface):
         for entity in self.enemies:
             entity.render(camera, surface)
-
-

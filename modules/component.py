@@ -1,4 +1,6 @@
 import pygame as pg
+from pygame.surface import Surface
+
 from modules.entitystate import EntityState, Direction
 
 
@@ -123,6 +125,35 @@ class PhysicsComponent(Component):
         super().__init__()
         self.GRAVITY = 60
 
+    def update(self, delta_time, entity, game_map):
+        """Positions the entity at its future position, and handles all
+        collisions between the entity and other sprites."""
+
+        # TODO: Make the discrete timestep logic more readable.
+        DISCRETE_TIMESTEP = 1 / 60
+        num_full_steps = int(delta_time / DISCRETE_TIMESTEP)
+        remainder_time = delta_time % DISCRETE_TIMESTEP
+
+        for i in range(0, num_full_steps):
+            if entity.get_state() is not EntityState.CLIMBING \
+                    and entity.get_state() is not EntityState.HANGING:
+                entity.y_velocity += int(self.GRAVITY * DISCRETE_TIMESTEP * 60)
+            entity.rect.y += int(entity.y_velocity * DISCRETE_TIMESTEP)
+            self.handle_y_collisions(entity, game_map)
+            entity.rect.x += int(entity.x_velocity * DISCRETE_TIMESTEP)
+            self.handle_x_collisions(entity, game_map)
+
+        if entity.get_state() is not EntityState.CLIMBING \
+                and entity.get_state() is not EntityState.HANGING:
+            entity.y_velocity += int(self.GRAVITY * remainder_time * 60)
+        entity.rect.y += int(entity.y_velocity * remainder_time)
+        if int(entity.y_velocity * remainder_time) != 0:
+            self.handle_y_collisions(entity, game_map)
+        entity.rect.x += int(entity.x_velocity * remainder_time)
+        self.handle_x_collisions(entity, game_map)
+
+        self.handle_map_boundary_collisions(entity, game_map)
+
     @staticmethod
     def handle_y_collisions(entity, map):
         """Handles collisions between entity and the terrain along the y-axis."""
@@ -166,36 +197,6 @@ class PhysicsComponent(Component):
             entity.rect.left = 0
         elif entity.rect.right > map_width:
             entity.rect.right = map_width
-
-
-    def update(self, delta_time, entity, game_map):
-        """Positions the entity at its future position, and handles all
-        collisions between the entity and other sprites."""
-
-        # TODO: Make the discrete timestep logic more readable.
-        DISCRETE_TIMESTEP = 1 / 60
-        num_full_steps = int(delta_time / DISCRETE_TIMESTEP)
-        remainder_time = delta_time % DISCRETE_TIMESTEP
-
-        for i in range(0, num_full_steps):
-            if entity.get_state() is not EntityState.CLIMBING \
-                    and entity.get_state() is not EntityState.HANGING:
-                entity.y_velocity += int(self.GRAVITY * DISCRETE_TIMESTEP * 60)
-            entity.rect.y += int(entity.y_velocity * DISCRETE_TIMESTEP)
-            self.handle_y_collisions(entity, game_map)
-            entity.rect.x += int(entity.x_velocity * DISCRETE_TIMESTEP)
-            self.handle_x_collisions(entity, game_map)
-
-        if entity.get_state() is not EntityState.CLIMBING \
-                and entity.get_state() is not EntityState.HANGING:
-            entity.y_velocity += int(self.GRAVITY * remainder_time * 60)
-        entity.rect.y += int(entity.y_velocity * remainder_time)
-        if int(entity.y_velocity * remainder_time) != 0:
-            self.handle_y_collisions(entity, game_map)
-        entity.rect.x += int(entity.x_velocity * remainder_time)
-        self.handle_x_collisions(entity, game_map)
-
-        self.handle_map_boundary_collisions(entity, game_map)
 
 
 class TerrainAnimationComponent(Component):
@@ -290,13 +291,14 @@ class RenderComponent(Component):
     def __init__(self):
         super().__init__()
 
-    def update(self, entity, camera, surface):
-        # Flip image if Player is moving backward
+    def update(self, entity, camera, game_display: Surface):
+        # TODO: Abstract away all the blit_rect logic
         rendered_image = entity.image.subsurface(entity.blit_rect)
-        if entity.direction == Direction.LEFT:
+        if entity.get_direction() is Direction.LEFT:
+            # Flip image if Player is moving backward
             rendered_image = pg.transform.flip(rendered_image, True, False)
-        surface.blit(rendered_image,
-                     (entity.rect.x - camera.rect.x, entity.rect.y - camera.rect.y))
+        blit_destination = (entity.rect.x - camera.rect.x, entity.rect.y - camera.rect.y)
+        game_display.blit(rendered_image, blit_destination)
 
 
 class SoundComponent(Component):
@@ -341,8 +343,9 @@ class EnemyPhysicsComponent(PhysicsComponent):
 
     @staticmethod
     def handle_x_collisions(enemy, map):
-        """Handles collisions between the enemy and the terrain along the x-axis.
-        Enemies would reverse its direction and velocity upon collision with a sprite."""
+        """Handles collisions between the enemy and the terrain
+        along the x-axis. Enemies would reverse its direction
+        and velocity upon collision with a sprite."""
         colliding_sprites = pg.sprite.spritecollide(
             enemy, map.collideable_terrain_group, False)
         for colliding_sprite in colliding_sprites:
@@ -355,26 +358,33 @@ class EnemyPhysicsComponent(PhysicsComponent):
             enemy.reverse_x_velocity()
 
 
-class EnemyDamageCollisionComponent(Component):
-    def __init__(self):
+class EnemyDamageComponent(Component):
+    """Handles the situations in which the enemy would take damage in health."""
+    # TODO: Implement a component for player to take
+    #  damage (20) when its rect collides with enemy's rect
+
+    def __init__(self, enemy):
         super().__init__()
+        self.enemy = enemy
 
-    def update(self, entity, player):
-        # Reverted changes, since rect is used in physics
-        if entity.rect.colliderect(player.rect):
-            if player.rect.bottom < entity.rect.centery and player.y_velocity > 0:
-                entity.take_damage(100)
-                player.take_damage(0)
-                print("Player killed an enemy!")
-            else:
-                player.take_damage(20)
+    def update(self, player, map):
+        self.take_damage_if_stomped_by_player(player)
+        self.take_damage_if_crushed_by_terrain(map)
 
+    def take_damage_if_stomped_by_player(self, player):
+        is_stomped_by_player = \
+            self.enemy.rect.colliderect(player.rect) \
+            and (player.rect.bottom < self.enemy.rect.centery
+                 and player.y_velocity > 0)
+        if is_stomped_by_player:
+            self.enemy.take_damage(100)
 
-class EnemyDamageCrushComponent(Component):
-    def __init__(self):
-        super().__init__()
-
-    def update(self, entity, map):
-        for colliding_sprite in pg.sprite.spritecollide(entity, map.collideable_terrain_group, False):
-            if colliding_sprite.rect.bottom < entity.rect.centery:
-                entity.take_damage(100)
+    def take_damage_if_crushed_by_terrain(self, map):
+        colliding_sprites = pg.sprite.spritecollide(
+            self.enemy, map.collideable_terrain_group, False)
+        for colliding_sprite in colliding_sprites:
+            is_crushed_by_terrain = \
+                colliding_sprite.rect.bottom \
+                < self.enemy.rect.centery
+            if is_crushed_by_terrain:
+                self.enemy.take_damage(100)
