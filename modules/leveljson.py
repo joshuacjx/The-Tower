@@ -3,7 +3,7 @@ import json
 from modules.block import Block, FallingBlock, PushableBlock, LadderBlock, SpikeBlock, GatewayBlock, Coin
 from modules.entities import Enemy, PinkGuy, TrashMonster, ToothWalker
 from modules.entitystate import GameEvent, EntityState
-from modules.component import RenderComponent, EnemyAIInputComponent, EnemyPhysicsComponent
+from modules.component import RenderComponent, EnemyMovementComponent, EnemyPhysicsComponent
 from modules.textureset import TextureSet
 
 """
@@ -207,7 +207,7 @@ class EnemyManager:
                             "Trash Monster": TrashMonster(),
                             "Tooth Walker": ToothWalker()
                            }
-        self.ai = EnemyAIInputComponent()
+        self.ai = EnemyMovementComponent()
         self.physics = EnemyPhysicsComponent()
         self.renderer = RenderComponent()
 

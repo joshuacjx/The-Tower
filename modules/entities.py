@@ -33,9 +33,10 @@ class Entity(pg.sprite.Sprite):
         # TODO: Make velocity, direction and state information private
         super().__init__()
 
-        """Defines the position of the entity."""
+        # Defines the entity's position
         self.rect = None
 
+        # Defines the entity's state of motion
         self.x_velocity = 0              
         self.y_velocity = 0
         self.direction = Direction.RIGHT
@@ -54,15 +55,26 @@ class Entity(pg.sprite.Sprite):
     def set_y_velocity(self, new_y_velocity):
         self.y_velocity = new_y_velocity
 
-    # -- Direction Setter -- #
+    def reverse_x_velocity(self):
+        self.x_velocity = -self.x_velocity
+
+    # -- Direction Getters and Setters -- #
+    def get_direction(self):
+        return self.direction
+
     def set_direction(self, new_direction: Direction):
         self.direction = new_direction
 
-    # -- State Getter -- #
+    def reverse_direction(self):
+        if self.direction is Direction.LEFT:
+            self.direction = Direction.RIGHT
+        elif self.direction is Direction.RIGHT:
+            self.direction = Direction.LEFT
+
+    # -- State Getters and Setters -- #
     def get_state(self):
         return self.state
 
-    # -- State Setter -- #
     def set_state(self, new_state: EntityState):
         self.state = new_state
 
@@ -83,6 +95,7 @@ class Entity(pg.sprite.Sprite):
 
 class Player(Entity):
     """Represents the player character"""
+
     def __init__(self):
         super().__init__()
         self.health = 100
@@ -218,8 +231,8 @@ class Enemy(Entity):
     def message(self, message):
         pass
     
-    def update(self,delta_time, map, player):
-        self.input_component.update(self, map)
+    def update(self, delta_time, map, player):
+        self.input_component.update(self)
         self.physics_component.update(delta_time, self, map)
         self.damage_collide_component.update(self, player)
         self.damage_crush_component.update(self, map)

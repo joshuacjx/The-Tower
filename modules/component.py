@@ -8,6 +8,8 @@ class Component:
     they do not contain information on state."""
 
     def __init__(self):
+        # TODO: All components should have information on the game map,
+        #  entity etc. so that its update function needs no arguments.
         pass
 
     def update(self, *args):
@@ -47,71 +49,55 @@ class UserControlComponent(Component):
         state = entity.get_state()
 
         if state is EntityState.IDLE:
-
             entity.set_x_velocity(ZERO_VELOCITY)
             entity.set_y_velocity(ZERO_VELOCITY)
-
             if is_pressed[LEFT_KEY]:
                 entity.set_state(EntityState.WALKING)
                 entity.set_direction(Direction.LEFT)
                 entity.set_x_velocity(WALK_LEFT_VELOCITY)
-
             if is_pressed[RIGHT_KEY]:
                 entity.set_state(EntityState.WALKING)
                 entity.set_direction(Direction.RIGHT)
                 entity.set_x_velocity(WALK_RIGHT_VELOCITY)
-
             if is_pressed[SPACE_KEY]:
                 entity.set_state(EntityState.JUMPING)
                 entity.set_y_velocity(JUMP_VELOCITY)
                 entity.message("JUMP")
 
         elif state is EntityState.WALKING:
-
             if is_pressed[LEFT_KEY]:
                 entity.set_direction(Direction.LEFT)
                 entity.set_x_velocity(WALK_LEFT_VELOCITY)
-
             if is_pressed[RIGHT_KEY]:
                 entity.set_direction(Direction.RIGHT)
                 entity.set_x_velocity(WALK_RIGHT_VELOCITY)
-
             if not (is_pressed[LEFT_KEY] or is_pressed[RIGHT_KEY]):
                 entity.set_state(EntityState.IDLE)
                 entity.set_x_velocity(ZERO_VELOCITY)
-
             if is_pressed[SPACE_KEY]:
                 entity.set_state(EntityState.JUMPING)
                 entity.set_y_velocity(JUMP_VELOCITY)
                 entity.message("JUMP")
 
         elif state is EntityState.JUMPING:
-
             if is_pressed[LEFT_KEY]:
                 entity.set_x_velocity(WALK_LEFT_VELOCITY)
                 entity.set_direction(Direction.LEFT)
-
             if is_pressed[RIGHT_KEY]:
                 entity.set_x_velocity(WALK_RIGHT_VELOCITY)
                 entity.set_direction(Direction.RIGHT)
-
             if not (is_pressed[LEFT_KEY] or is_pressed[RIGHT_KEY]):
                 entity.set_x_velocity(ZERO_VELOCITY)
 
         elif state is EntityState.HANGING:
-
             entity.set_x_velocity(ZERO_VELOCITY)
             entity.set_y_velocity(ZERO_VELOCITY)
-
             if is_pressed[UP_KEY] or is_pressed[DOWN_KEY]:
                 entity.set_state(EntityState.CLIMBING)
-
             if is_pressed[LEFT_KEY]:
                 entity.set_direction(Direction.RIGHT)
-
             if is_pressed[RIGHT_KEY]:
                 entity.set_direction(Direction.LEFT)
-
             if is_pressed[SPACE_KEY]:
                 entity.set_state(EntityState.JUMPING)
                 entity.set_y_velocity(JUMP_VELOCITY)
@@ -119,13 +105,10 @@ class UserControlComponent(Component):
 
         # TODO: Find out why elif and state cannot be used here
         if entity.get_state() is EntityState.CLIMBING:
-
             if is_pressed[UP_KEY]:
                 entity.set_y_velocity(CLIMB_UP_VELOCITY)
-
             if is_pressed[DOWN_KEY]:
                 entity.set_y_velocity(CLIMB_DOWN_VELOCITY)
-
             if not (is_pressed[UP_KEY] or is_pressed[DOWN_KEY]):
                 entity.set_state(EntityState.HANGING)
 
@@ -302,26 +285,28 @@ class SoundComponent(Component):
             self.sounds["HIT"].play()
 
 
-# -------------------- ENEMY COMPONENTS -------------------- #
-class EnemyAIInputComponent(Component):
-    # This is a simple AI component that walks back and forth between two points
-    def __init__(self):
-        super().__init__()
+class EnemyMovementComponent(Component):
+    """Handles the back and forth movement of
+    the Enemy sprites between two points."""
 
-    def update(self, entity, map):
-        entity.state = EntityState.WALKING
-        if entity.direction == Direction.LEFT:
-            if entity.rect.x > entity.left_bound:
-                entity.x_velocity = -90
+    def __init__(self, walking_speed=90):
+        super().__init__()
+        self.walking_speed = walking_speed
+
+    def update(self, enemy):
+        enemy.set_state(EntityState.WALKING)
+        if enemy.get_direction() is Direction.LEFT:
+            if enemy.rect.x > enemy.left_bound:
+                enemy.set_x_velocity(-self.walking_speed)
             else:
-                entity.direction = Direction.RIGHT
-                entity.x_velocity = 90
-        else:
-            if entity.rect.x < entity.right_bound:
-                entity.x_velocity = 90
+                enemy.reverse_direction()
+                enemy.set_x_velocity(self.walking_speed)
+        elif enemy.get_direction() is Direction.RIGHT:
+            if enemy.rect.x < enemy.right_bound:
+                enemy.set_x_velocity(self.walking_speed)
             else:
-                entity.direction = Direction.LEFT
-                entity.x_velocity = -90
+                enemy.reverse_direction()
+                enemy.set_x_velocity(-self.walking_speed)
 
 
 class EnemyPhysicsComponent(PhysicsComponent):
@@ -335,15 +320,13 @@ class EnemyPhysicsComponent(PhysicsComponent):
         colliding_sprites = pg.sprite.spritecollide(
             enemy, map.collideable_terrain_group, False)
         for colliding_sprite in colliding_sprites:
-            if not colliding_sprite.is_spike:
-                if enemy.is_colliding_from_right(colliding_sprite):
-                    enemy.rect.left = colliding_sprite.rect.right
-                    enemy.set_direction(Direction.RIGHT)
-                    enemy.x_velocity = -enemy.x_velocity
-                if enemy.is_colliding_from_left(colliding_sprite):
-                    enemy.rect.right = colliding_sprite.rect.left
-                    enemy.set_direction(Direction.LEFT)
-                    enemy.x_velocity = -enemy.x_velocity
+            if enemy.is_colliding_from_right(colliding_sprite):
+                enemy.rect.left = colliding_sprite.rect.right
+                enemy.set_direction(Direction.RIGHT)
+            if enemy.is_colliding_from_left(colliding_sprite):
+                enemy.rect.right = colliding_sprite.rect.left
+                enemy.set_direction(Direction.LEFT)
+            enemy.reverse_x_velocity()
 
 
 class EnemyDamageCollisionComponent(Component):
