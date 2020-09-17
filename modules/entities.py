@@ -130,7 +130,7 @@ class Player(Entity):
                         }
 
         # Components
-        self.input_component = UserControlComponent()
+        self.input_component = UserControlComponent(self)
         self.animation_component = EntityAnimationComponent(self, animation_library)
         self.physics_component = PhysicsComponent()
         self.sound_component = SoundComponent(sound_library)
@@ -139,8 +139,7 @@ class Player(Entity):
         # Current Image
         self.image = self.animation_component.get_current_image()
 
-    # ---------- DIRTY METHODS ---------- #
-    # These will be placed here until I can find a way to wrap them in a component nicely
+    # TODO: Abstract the damage logic into a component
     def take_damage(self, damage):
         """Decreases the health of the player by the specified amount"""
         if self.is_immune():
@@ -168,7 +167,7 @@ class Player(Entity):
         self.sound_component.receive(message)
 
     def handle_input(self):
-        self.input_component.update(self)
+        self.input_component.update()
 
     def update(self, delta_time, map):
         if self.rect.top > map.rect.bottom:

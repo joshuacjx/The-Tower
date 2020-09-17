@@ -23,8 +23,10 @@ class UserControlComponent(Component):
     """Handles user input which modifies the state,
     velocity and direction of the Entity sprite."""
 
-    def __init__(self):
+    def __init__(self, entity):
         super().__init__()
+        self.entity = entity
+
         self.ZERO_VELOCITY = 0
         self.WALK_LEFT_VELOCITY = -180
         self.WALK_RIGHT_VELOCITY = 180
@@ -32,84 +34,84 @@ class UserControlComponent(Component):
         self.CLIMB_UP_VELOCITY = -120
         self.CLIMB_DOWN_VELOCITY = 180
 
-    def update(self, entity):
+    def update(self):
         """Updates the state, direction and velocity
         of the entity based on the user input."""
-
         is_pressed = pg.key.get_pressed()
-        LEFT_KEY = pg.K_LEFT
-        RIGHT_KEY = pg.K_RIGHT
-        UP_KEY = pg.K_UP
-        DOWN_KEY = pg.K_DOWN
-        SPACE_KEY = pg.K_SPACE
-
-        # TODO: Split all the state cases into several functions
-        #  for readability and ease of addition of new states in future.
-
-        state = entity.get_state()
+        state = self.entity.get_state()
         if state is EntityState.IDLE:
-            entity.set_x_velocity(self.ZERO_VELOCITY)
-            entity.set_y_velocity(self.ZERO_VELOCITY)
-            if is_pressed[LEFT_KEY]:
-                entity.set_state(EntityState.WALKING)
-                entity.set_direction(Direction.LEFT)
-                entity.set_x_velocity(self.WALK_LEFT_VELOCITY)
-            if is_pressed[RIGHT_KEY]:
-                entity.set_state(EntityState.WALKING)
-                entity.set_direction(Direction.RIGHT)
-                entity.set_x_velocity(self.WALK_RIGHT_VELOCITY)
-            if is_pressed[SPACE_KEY]:
-                entity.set_state(EntityState.JUMPING)
-                entity.set_y_velocity(self.JUMP_VELOCITY)
-                entity.message("JUMP")
-
+            self.handle_idle_entity(is_pressed)
         elif state is EntityState.WALKING:
-            if is_pressed[LEFT_KEY]:
-                entity.set_direction(Direction.LEFT)
-                entity.set_x_velocity(self.WALK_LEFT_VELOCITY)
-            if is_pressed[RIGHT_KEY]:
-                entity.set_direction(Direction.RIGHT)
-                entity.set_x_velocity(self.WALK_RIGHT_VELOCITY)
-            if not (is_pressed[LEFT_KEY] or is_pressed[RIGHT_KEY]):
-                entity.set_state(EntityState.IDLE)
-                entity.set_x_velocity(self.ZERO_VELOCITY)
-            if is_pressed[SPACE_KEY]:
-                entity.set_state(EntityState.JUMPING)
-                entity.set_y_velocity(self.JUMP_VELOCITY)
-                entity.message("JUMP")
-
+            self.handle_walking_entity(is_pressed)
         elif state is EntityState.JUMPING:
-            if is_pressed[LEFT_KEY]:
-                entity.set_x_velocity(self.WALK_LEFT_VELOCITY)
-                entity.set_direction(Direction.LEFT)
-            if is_pressed[RIGHT_KEY]:
-                entity.set_x_velocity(self.WALK_RIGHT_VELOCITY)
-                entity.set_direction(Direction.RIGHT)
-            if not (is_pressed[LEFT_KEY] or is_pressed[RIGHT_KEY]):
-                entity.set_x_velocity(self.ZERO_VELOCITY)
-
+            self.handle_jumping_entity(is_pressed)
         elif state is EntityState.HANGING:
-            entity.set_x_velocity(self.ZERO_VELOCITY)
-            entity.set_y_velocity(self.ZERO_VELOCITY)
-            if is_pressed[UP_KEY] or is_pressed[DOWN_KEY]:
-                entity.set_state(EntityState.CLIMBING)
-            if is_pressed[LEFT_KEY]:
-                entity.set_direction(Direction.RIGHT)
-            if is_pressed[RIGHT_KEY]:
-                entity.set_direction(Direction.LEFT)
-            if is_pressed[SPACE_KEY]:
-                entity.set_state(EntityState.JUMPING)
-                entity.set_y_velocity(self.JUMP_VELOCITY)
-                entity.message("JUMP")
+            self.handle_hanging_entity(is_pressed)
+        if self.entity.get_state() is EntityState.CLIMBING:
+            self.handle_climbing_entity(is_pressed)
 
-        # TODO: Find out why elif and state cannot be used here
-        if entity.get_state() is EntityState.CLIMBING:
-            if is_pressed[UP_KEY]:
-                entity.set_y_velocity(self.CLIMB_UP_VELOCITY)
-            if is_pressed[DOWN_KEY]:
-                entity.set_y_velocity(self.CLIMB_DOWN_VELOCITY)
-            if not (is_pressed[UP_KEY] or is_pressed[DOWN_KEY]):
-                entity.set_state(EntityState.HANGING)
+    def handle_idle_entity(self, is_pressed: dict):
+        self.entity.set_x_velocity(self.ZERO_VELOCITY)
+        self.entity.set_y_velocity(self.ZERO_VELOCITY)
+        if is_pressed[pg.K_LEFT]:
+            self.entity.set_state(EntityState.WALKING)
+            self.entity.set_direction(Direction.LEFT)
+            self.entity.set_x_velocity(self.WALK_LEFT_VELOCITY)
+        if is_pressed[pg.K_RIGHT]:
+            self.entity.set_state(EntityState.WALKING)
+            self.entity.set_direction(Direction.RIGHT)
+            self.entity.set_x_velocity(self.WALK_RIGHT_VELOCITY)
+        if is_pressed[pg.K_SPACE]:
+            self.entity.set_state(EntityState.JUMPING)
+            self.entity.set_y_velocity(self.JUMP_VELOCITY)
+            self.entity.message("JUMP")
+
+    def handle_walking_entity(self, is_pressed: dict):
+        if is_pressed[pg.K_LEFT]:
+            self.entity.set_direction(Direction.LEFT)
+            self.entity.set_x_velocity(self.WALK_LEFT_VELOCITY)
+        if is_pressed[pg.K_RIGHT]:
+            self.entity.set_direction(Direction.RIGHT)
+            self.entity.set_x_velocity(self.WALK_RIGHT_VELOCITY)
+        if not (is_pressed[pg.K_LEFT] or is_pressed[pg.K_RIGHT]):
+            self.entity.set_state(EntityState.IDLE)
+            self.entity.set_x_velocity(self.ZERO_VELOCITY)
+        if is_pressed[pg.K_SPACE]:
+            self.entity.set_state(EntityState.JUMPING)
+            self.entity.set_y_velocity(self.JUMP_VELOCITY)
+            self.entity.message("JUMP")
+
+    def handle_jumping_entity(self, is_pressed: dict):
+        if is_pressed[pg.K_LEFT]:
+            self.entity.set_x_velocity(self.WALK_LEFT_VELOCITY)
+            self.entity.set_direction(Direction.LEFT)
+        if is_pressed[pg.K_RIGHT]:
+            self.entity.set_x_velocity(self.WALK_RIGHT_VELOCITY)
+            self.entity.set_direction(Direction.RIGHT)
+        if not (is_pressed[pg.K_LEFT] or is_pressed[pg.K_RIGHT]):
+            self.entity.set_x_velocity(self.ZERO_VELOCITY)
+
+    def handle_hanging_entity(self, is_pressed: dict):
+        self.entity.set_x_velocity(self.ZERO_VELOCITY)
+        self.entity.set_y_velocity(self.ZERO_VELOCITY)
+        if is_pressed[pg.K_UP] or is_pressed[pg.K_DOWN]:
+            self.entity.set_state(EntityState.CLIMBING)
+        if is_pressed[pg.K_LEFT]:
+            self.entity.set_direction(Direction.RIGHT)
+        if is_pressed[pg.K_RIGHT]:
+            self.entity.set_direction(Direction.LEFT)
+        if is_pressed[pg.K_SPACE]:
+            self.entity.set_state(EntityState.JUMPING)
+            self.entity.set_y_velocity(self.JUMP_VELOCITY)
+            self.entity.message("JUMP")
+
+    def handle_climbing_entity(self, is_pressed: dict):
+        if is_pressed[pg.K_UP]:
+            self.entity.set_y_velocity(self.CLIMB_UP_VELOCITY)
+        if is_pressed[pg.K_DOWN]:
+            self.entity.set_y_velocity(self.CLIMB_DOWN_VELOCITY)
+        if not (is_pressed[pg.K_UP] or is_pressed[pg.K_DOWN]):
+            self.entity.set_state(EntityState.HANGING)
 
 
 class PhysicsComponent(Component):
