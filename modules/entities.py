@@ -1,7 +1,7 @@
 import pygame as pg
 from .entitystate import GameEvent, EntityState, Direction
 from .spritesheet import Spritesheet
-from modules.component import UserControlComponent, PlayerAnimationComponent, PhysicsComponent, \
+from modules.component import UserControlComponent, EntityAnimationComponent, PhysicsComponent, \
                         SoundComponent, RenderComponent, EnemyDamageCollisionComponent, \
                         EnemyDamageCrushComponent
 
@@ -131,7 +131,7 @@ class Player(Entity):
 
         # Components
         self.input_component = UserControlComponent()
-        self.animation_component = PlayerAnimationComponent(animation_library, self.state)
+        self.animation_component = EntityAnimationComponent(self, animation_library)
         self.physics_component = PhysicsComponent()
         self.sound_component = SoundComponent(sound_library)
         self.render_component = RenderComponent()
@@ -180,7 +180,7 @@ class Player(Entity):
             )
         else:
             self.physics_component.update(delta_time, self, map)
-            self.animation_component.update(self)
+            self.animation_component.update()
 
     def render(self, camera, surface):
         self.render_component.update(self, camera, surface)
@@ -212,7 +212,7 @@ class Enemy(Entity):
         self.damage_crush_component = EnemyDamageCrushComponent()
 
         # Animation and sound are taken from a type object
-        self.animation_component = PlayerAnimationComponent(type_object.animation_library, self.state)
+        self.animation_component = EntityAnimationComponent(self, type_object.animation_library)
         self.sound_component = SoundComponent(type_object.sound_library)
 
         # Define starting position
@@ -237,7 +237,7 @@ class Enemy(Entity):
         self.physics_component.update(delta_time, self, map)
         self.damage_collide_component.update(self, player)
         self.damage_crush_component.update(self, map)
-        self.animation_component.update(self)
+        self.animation_component.update()
 
     def render(self, camera, surface):
         self.render_component.update(self, camera, surface)
