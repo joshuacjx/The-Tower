@@ -28,6 +28,11 @@ HOW TO MAKE A NEW ENEMY VARIANT
 
 
 class Entity(pg.sprite.Sprite):
+    """Players and Enemies are defined as Entities in the game. Entities have
+    their position stored in their rect attribute, which is updated every frame
+    according to its x- and y-velocities. They also have states enumerated in the
+    class EntityState. The Entity class defines functions to access and modify
+    the Entity's state, direction and velocities."""
 
     def __init__(self):
         # TODO: Make velocity, direction and state information private
@@ -48,7 +53,6 @@ class Entity(pg.sprite.Sprite):
     def message(self, message):
         pass
 
-    # -- Velocity Setters -- #
     def set_x_velocity(self, new_x_velocity):
         self.x_velocity = new_x_velocity
 
@@ -58,7 +62,6 @@ class Entity(pg.sprite.Sprite):
     def reverse_x_velocity(self):
         self.x_velocity = -self.x_velocity
 
-    # -- Direction Getters and Setters -- #
     def get_direction(self):
         return self.direction
 
@@ -71,14 +74,12 @@ class Entity(pg.sprite.Sprite):
         elif self.direction is Direction.RIGHT:
             self.direction = Direction.LEFT
 
-    # -- State Getters and Setters -- #
     def get_state(self):
         return self.state
 
     def set_state(self, new_state: EntityState):
         self.state = new_state
 
-    # -- Collision Information -- #
     def is_colliding_from_below(self, colliding_sprite):
         return colliding_sprite.rect.top < self.rect.top < colliding_sprite.rect.bottom
 

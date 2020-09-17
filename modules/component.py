@@ -25,6 +25,12 @@ class UserControlComponent(Component):
 
     def __init__(self):
         super().__init__()
+        self.ZERO_VELOCITY = 0
+        self.WALK_LEFT_VELOCITY = -180
+        self.WALK_RIGHT_VELOCITY = 180
+        self.JUMP_VELOCITY = -750
+        self.CLIMB_UP_VELOCITY = -120
+        self.CLIMB_DOWN_VELOCITY = 180
 
     def update(self, entity):
         """Updates the state, direction and velocity
@@ -37,61 +43,53 @@ class UserControlComponent(Component):
         DOWN_KEY = pg.K_DOWN
         SPACE_KEY = pg.K_SPACE
 
-        # Velocity constants
-        ZERO_VELOCITY = 0
-        WALK_LEFT_VELOCITY = -180
-        WALK_RIGHT_VELOCITY = 180
-        JUMP_VELOCITY = -750
-        CLIMB_UP_VELOCITY = -120
-        CLIMB_DOWN_VELOCITY = 180
-
         is_pressed = pg.key.get_pressed()
         state = entity.get_state()
 
         if state is EntityState.IDLE:
-            entity.set_x_velocity(ZERO_VELOCITY)
-            entity.set_y_velocity(ZERO_VELOCITY)
+            entity.set_x_velocity(self.ZERO_VELOCITY)
+            entity.set_y_velocity(self.ZERO_VELOCITY)
             if is_pressed[LEFT_KEY]:
                 entity.set_state(EntityState.WALKING)
                 entity.set_direction(Direction.LEFT)
-                entity.set_x_velocity(WALK_LEFT_VELOCITY)
+                entity.set_x_velocity(self.WALK_LEFT_VELOCITY)
             if is_pressed[RIGHT_KEY]:
                 entity.set_state(EntityState.WALKING)
                 entity.set_direction(Direction.RIGHT)
-                entity.set_x_velocity(WALK_RIGHT_VELOCITY)
+                entity.set_x_velocity(self.WALK_RIGHT_VELOCITY)
             if is_pressed[SPACE_KEY]:
                 entity.set_state(EntityState.JUMPING)
-                entity.set_y_velocity(JUMP_VELOCITY)
+                entity.set_y_velocity(self.JUMP_VELOCITY)
                 entity.message("JUMP")
 
         elif state is EntityState.WALKING:
             if is_pressed[LEFT_KEY]:
                 entity.set_direction(Direction.LEFT)
-                entity.set_x_velocity(WALK_LEFT_VELOCITY)
+                entity.set_x_velocity(self.WALK_LEFT_VELOCITY)
             if is_pressed[RIGHT_KEY]:
                 entity.set_direction(Direction.RIGHT)
-                entity.set_x_velocity(WALK_RIGHT_VELOCITY)
+                entity.set_x_velocity(self.WALK_RIGHT_VELOCITY)
             if not (is_pressed[LEFT_KEY] or is_pressed[RIGHT_KEY]):
                 entity.set_state(EntityState.IDLE)
-                entity.set_x_velocity(ZERO_VELOCITY)
+                entity.set_x_velocity(self.ZERO_VELOCITY)
             if is_pressed[SPACE_KEY]:
                 entity.set_state(EntityState.JUMPING)
-                entity.set_y_velocity(JUMP_VELOCITY)
+                entity.set_y_velocity(self.JUMP_VELOCITY)
                 entity.message("JUMP")
 
         elif state is EntityState.JUMPING:
             if is_pressed[LEFT_KEY]:
-                entity.set_x_velocity(WALK_LEFT_VELOCITY)
+                entity.set_x_velocity(self.WALK_LEFT_VELOCITY)
                 entity.set_direction(Direction.LEFT)
             if is_pressed[RIGHT_KEY]:
-                entity.set_x_velocity(WALK_RIGHT_VELOCITY)
+                entity.set_x_velocity(self.WALK_RIGHT_VELOCITY)
                 entity.set_direction(Direction.RIGHT)
             if not (is_pressed[LEFT_KEY] or is_pressed[RIGHT_KEY]):
-                entity.set_x_velocity(ZERO_VELOCITY)
+                entity.set_x_velocity(self.ZERO_VELOCITY)
 
         elif state is EntityState.HANGING:
-            entity.set_x_velocity(ZERO_VELOCITY)
-            entity.set_y_velocity(ZERO_VELOCITY)
+            entity.set_x_velocity(self.ZERO_VELOCITY)
+            entity.set_y_velocity(self.ZERO_VELOCITY)
             if is_pressed[UP_KEY] or is_pressed[DOWN_KEY]:
                 entity.set_state(EntityState.CLIMBING)
             if is_pressed[LEFT_KEY]:
@@ -100,15 +98,15 @@ class UserControlComponent(Component):
                 entity.set_direction(Direction.LEFT)
             if is_pressed[SPACE_KEY]:
                 entity.set_state(EntityState.JUMPING)
-                entity.set_y_velocity(JUMP_VELOCITY)
+                entity.set_y_velocity(self.JUMP_VELOCITY)
                 entity.message("JUMP")
 
         # TODO: Find out why elif and state cannot be used here
         if entity.get_state() is EntityState.CLIMBING:
             if is_pressed[UP_KEY]:
-                entity.set_y_velocity(CLIMB_UP_VELOCITY)
+                entity.set_y_velocity(self.CLIMB_UP_VELOCITY)
             if is_pressed[DOWN_KEY]:
-                entity.set_y_velocity(CLIMB_DOWN_VELOCITY)
+                entity.set_y_velocity(self.CLIMB_DOWN_VELOCITY)
             if not (is_pressed[UP_KEY] or is_pressed[DOWN_KEY]):
                 entity.set_state(EntityState.HANGING)
 
