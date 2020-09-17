@@ -1,29 +1,9 @@
 import pygame as pg
 from .entitystate import GameEvent, EntityState, Direction
 from .spritesheet import Spritesheet
-from modules.component import UserControlComponent, EntityAnimationComponent, PhysicsComponent, \
-                        SoundComponent, RenderComponent, EnemyDamageComponent
-
-"""
-* =============================================================== *
-* This module contains all relevant classes required for the      *
-* instantiation of the Player and Enemies.                        *
-* =============================================================== *
-
-HOW TO MAKE A NEW ENEMY VARIANT
--------------------------
-1.  Make a new EnemyType object with the following public attributes:
-        health: int                 ->      Maximum health of the Enemy
-        animation_library: dict     ->      Dictionary containing the different 
-                                            animation sequences to be played 
-                                            for each state
-        sound_library: dict         ->      Dictionary containing the different
-                                            sounds to be played for each state
-2.  Conduct manual inspection to determine the best width, height and hit_rect 
-    attribute for the EnemyType.
-3.  Pass this EnemyType object to the Enemy constructor to instantiate a new variant 
-    of Enemy
-"""
+from modules.component import EntityAnimationComponent, \
+    SoundComponent, RenderComponent, EnemyDamageComponent
+from modules.physics import UserControlComponent, PhysicsComponent
 
 
 class Entity(pg.sprite.Sprite):
@@ -41,10 +21,9 @@ class Entity(pg.sprite.Sprite):
 
         super().__init__()
 
-        # Defines the entity's position
         self.rect = None
+        """Defines the entity's position."""
 
-        # Defines the entity's state of motion
         self.x_velocity = 0              
         self.y_velocity = 0
         self.direction = Direction.RIGHT
@@ -82,18 +61,6 @@ class Entity(pg.sprite.Sprite):
 
     def set_state(self, new_state: EntityState):
         self.state = new_state
-
-    def is_colliding_from_below(self, colliding_sprite):
-        return colliding_sprite.rect.top < self.rect.top < colliding_sprite.rect.bottom
-
-    def is_colliding_from_above(self, colliding_sprite):
-        return colliding_sprite.rect.top < self.rect.bottom < colliding_sprite.rect.bottom
-
-    def is_colliding_from_right(self, colliding_sprite):
-        return colliding_sprite.rect.left < self.rect.left < colliding_sprite.rect.right
-
-    def is_colliding_from_left(self, colliding_sprite):
-        return colliding_sprite.rect.left < self.rect.right < colliding_sprite.rect.right
 
 
 class Player(Entity):
