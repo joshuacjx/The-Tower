@@ -8,11 +8,11 @@ class Component:
     they do not contain information on state."""
 
     def __init__(self):
-        # TODO: All components should have information on the game map,
-        #  entity etc. so that its update function needs no arguments.
         pass
 
     def update(self, *args):
+        # TODO: All update methods should have no arguments as all
+        #  the relevant information should be stored as attributes.
         pass
 
     def receive(self, message):
@@ -36,16 +36,17 @@ class UserControlComponent(Component):
         """Updates the state, direction and velocity
         of the entity based on the user input."""
 
-        # Keyboard constants
+        is_pressed = pg.key.get_pressed()
         LEFT_KEY = pg.K_LEFT
         RIGHT_KEY = pg.K_RIGHT
         UP_KEY = pg.K_UP
         DOWN_KEY = pg.K_DOWN
         SPACE_KEY = pg.K_SPACE
 
-        is_pressed = pg.key.get_pressed()
-        state = entity.get_state()
+        # TODO: Split all the state cases into several functions
+        #  for readability and ease of addition of new states in future.
 
+        state = entity.get_state()
         if state is EntityState.IDLE:
             entity.set_x_velocity(self.ZERO_VELOCITY)
             entity.set_y_velocity(self.ZERO_VELOCITY)
@@ -195,25 +196,37 @@ class PhysicsComponent(Component):
         self.handle_map_boundary_collisions(entity, game_map)
 
 
-# For simple and single animation of terrain, without any state
-class SimpleAnimationComponent(Component):
-    def __init__(self, animation_sequence):
+class AnimationComponent(Component):
+    """Handles simple animation of sprites, regardless of
+    the state of the sprite. This should be used for terrain
+    sprites, which do not have EntityState as an attribute,
+    and only has a single animation sequence."""
+
+    def __init__(self, animation_sequence: list, frames_per_update=5):
+        """Creates an animation component.
+
+        :param animation_sequence: A list of Surfaces in the animation.
+        :param frames_per_update: The speed of the animation.
+        """
+
         super().__init__()
         self.animation_sequence = animation_sequence
+        self.frames_per_update = frames_per_update  # Speed of animation
+
         self.frame_counter = 0
-        self.frames_per_update = 5
         self.current_index = 0
         self.animation_length = len(self.animation_sequence)
 
-    def update(self, entity):
-        self.frame_counter = (self.frame_counter + 1) % self.frames_per_update
-        if self.frame_counter == 0:
-            # this will probably cause some anim bugs
-            self.current_index = (self.current_index + 1) % self.animation_length
-            entity.image = self.animation_sequence[self.current_index]
-
     def get_current_image(self):
         return self.animation_sequence[self.current_index]
+
+    def update(self, sprite):
+        """Updates the image of the sprite to the
+        next Surface in the animation sequence"""
+        self.frame_counter = (self.frame_counter + 1) % self.frames_per_update
+        if self.frame_counter is 0:
+            self.current_index = (self.current_index + 1) % self.animation_length
+            sprite.image = self.get_current_image()
 
 
 class PlayerAnimationComponent(Component):
@@ -263,7 +276,6 @@ class RenderComponent(Component):
 
     def update(self, entity, camera, surface):
         # Flip image if Player is moving backward
-        # TODO: Get the proper posiiton of the image before flipping
         rendered_image = entity.image.subsurface(entity.blit_rect)
         if entity.direction == Direction.LEFT:
             rendered_image = pg.transform.flip(rendered_image, True, False)

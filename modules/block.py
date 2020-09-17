@@ -1,5 +1,5 @@
 import pygame as pg
-from modules.component import SimpleAnimationComponent
+from modules.component import AnimationComponent
 from .entitystate import GameEvent, EntityState, Direction
 from .spritesheet import Spritesheet, TerrainType
 
@@ -136,7 +136,7 @@ class Coin(Block):
         super().__init__(type_object, x, y)
         spritesheet = Spritesheet("assets/textures/environment/animated/ruby.png", 1, 16)
         coin_animation = spritesheet.get_images_at(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
-        self.animation_component = SimpleAnimationComponent(coin_animation)
+        self.animation_component = AnimationComponent(coin_animation)
         self.coin_sound = pg.mixer.Sound("assets/sound/sfx/coin.ogg")
 
     def update(self, entity, *args):
