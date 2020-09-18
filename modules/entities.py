@@ -3,7 +3,7 @@ from .entitystate import GameEvent, EntityState, Direction
 from .spritesheet import Spritesheet
 from .animation import Animation, EntityAnimationComponent
 from modules.component import SoundComponent, RenderComponent, EnemyDamageComponent
-from modules.physics import UserControlComponent, PhysicsComponent, EntityGravityComponent, EntityRigidBodyComponent
+from modules.physics import UserControlComponent, EntityGravityComponent, EntityRigidBodyComponent
 
 
 class Entity(pg.sprite.Sprite):
