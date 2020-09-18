@@ -19,7 +19,7 @@ class TerrainAnimationComponent(Component):
         self.current_animation = animation_sequence
         self.terrain_sprite = terrain_sprite
 
-        # TODO: Abstract all these counting information into another Animation class
+        # TODO: Abstract all these counting information into Animation class
         self.current_index = 0
         '''Index of the current image displayed in the animation sequence.'''
 

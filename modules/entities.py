@@ -1,6 +1,6 @@
 import pygame as pg
 from .entitystate import GameEvent, EntityState, Direction
-from .spritesheet import Spritesheet
+from .spritesheet import Spritesheet, Animation
 from .animation import EntityAnimationComponent
 from modules.component import SoundComponent, RenderComponent, EnemyDamageComponent
 from modules.physics import UserControlComponent, PhysicsComponent
@@ -74,19 +74,16 @@ class Player(Entity):
         self.blit_rect = pg.Rect(15, 3.5, 20, 30)
         self.last_collide_time = 0
 
-        # Spritesheets
         idle_spritesheet = Spritesheet("assets/textures/player/adventurer-idle.png", 1, 4)
         run_spritesheet = Spritesheet("assets/textures/player/adventurer-run.png", 1, 6)
         jump_spritesheet = Spritesheet("assets/textures/player/adventurer-jump.png", 1, 1)
         climb_spritesheet = Spritesheet("assets/textures/player/adventurer-climb.png", 1, 4)
-
-        # Animations
         animation_library = {
-                            EntityState.IDLE: idle_spritesheet.get_images_at(0, 1, 2, 3),
-                            EntityState.WALKING: run_spritesheet.get_images_at(0, 1, 2, 3, 4, 5),
-                            EntityState.JUMPING: jump_spritesheet.get_images_at(0),
-                            EntityState.HANGING: climb_spritesheet.get_images_at(0),
-                            EntityState.CLIMBING: climb_spritesheet.get_images_at(0, 1, 2, 3)
+                            EntityState.IDLE: Animation(idle_spritesheet, 0, 3).images,
+                            EntityState.WALKING: Animation(run_spritesheet, 0, 5).images,
+                            EntityState.JUMPING: Animation(jump_spritesheet, 0, 0).images,
+                            EntityState.HANGING: Animation(climb_spritesheet, 0, 0).images,
+                            EntityState.CLIMBING: Animation(climb_spritesheet, 0, 3).images
                             }
 
         # Sounds
@@ -234,10 +231,10 @@ class PinkGuy(EnemyType):
         run_spritesheet = Spritesheet("assets/textures/enemies/Pink Guy/Run.png", 1, 12)
         jump_spritesheet = Spritesheet("assets/textures/enemies/Pink Guy/Jump.png", 1, 1)
         self.animation_library = {
-            EntityState.IDLE: idle_spritesheet.get_images_at(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
-            EntityState.WALKING: run_spritesheet.get_images_at(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11),
-            EntityState.JUMPING: jump_spritesheet.get_images_at(0),
-            EntityState.DEAD: idle_spritesheet.get_images_at(0)
+            EntityState.IDLE: Animation(idle_spritesheet, 0, 10).images,
+            EntityState.WALKING: Animation(run_spritesheet, 0, 11).images,
+            EntityState.JUMPING: Animation(jump_spritesheet, 0, 0).images,
+            EntityState.DEAD: Animation(idle_spritesheet, 0, 0).images
         }
 
 
@@ -258,10 +255,10 @@ class TrashMonster(EnemyType):
         jump_spritesheet.scale_images_to_size(image_width, image_height)
 
         self.animation_library = {
-            EntityState.IDLE: idle_spritesheet.get_images_and_flip(0, 1, 2, 3, 4, 5),
-            EntityState.WALKING: run_spritesheet.get_images_and_flip(0, 1, 2, 3, 4, 5),
-            EntityState.JUMPING: jump_spritesheet.get_images_and_flip(0),
-            EntityState.DEAD: idle_spritesheet.get_images_and_flip(0)
+            EntityState.IDLE: Animation(idle_spritesheet, 0, 5, flip=True).images,
+            EntityState.WALKING: Animation(run_spritesheet, 0, 5, flip=True).images,
+            EntityState.JUMPING: Animation(jump_spritesheet, 0, 0, flip=True).images,
+            EntityState.DEAD: Animation(idle_spritesheet, 0, 0, flip=True).images
         }
 
 
@@ -279,9 +276,10 @@ class ToothWalker(EnemyType):
         walk_spritesheet.scale_images_to_size(image_width, image_height)
         dead_spritesheet.scale_images_to_size(image_width, image_height)
 
-        self.animation_library = {
-            EntityState.IDLE: walk_spritesheet.get_images_at(0),
-            EntityState.WALKING: walk_spritesheet.get_images_at(0, 1, 2, 3, 4, 5),
-            EntityState.JUMPING: walk_spritesheet.get_images_at(0),
-            EntityState.DEAD: dead_spritesheet.get_images_at(0)
-        }
+        self.animation_library = \
+            {
+            EntityState.IDLE: Animation(walk_spritesheet, 0, 0).images,
+            EntityState.WALKING: Animation(walk_spritesheet, 0, 5).images,
+            EntityState.JUMPING: Animation(walk_spritesheet, 0, 0).images,
+            EntityState.DEAD: Animation(dead_spritesheet, 0, 0).images
+            }
