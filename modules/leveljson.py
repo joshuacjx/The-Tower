@@ -131,7 +131,6 @@ class Map:
             for x in range(len(terrain_layer[0])):
                 code = terrain_layer[y][x]
 
-                # I'm leaving out cloudy boi as it really does not fit the game
                 if code != "  ":
                     if code == "FB":
                         new_block = FallingBlock(texture_set.get_texture_from_code(code),

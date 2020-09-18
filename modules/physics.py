@@ -120,7 +120,8 @@ class AIControlComponent(Component):
                 enemy.reverse_direction()
                 enemy.set_x_velocity(-self.walking_speed)
 
-        # FIXME: Reverse of direction after collision should be implemented via message-passing.
+        # FIXME: Reverse of direction after collision
+        #  should be implemented via message-passing.
         colliding_sprites = pg.sprite.spritecollide(
             enemy, map.collideable_terrain_group, False)
         for colliding_sprite in colliding_sprites:
@@ -134,7 +135,7 @@ class AIControlComponent(Component):
 class EntityGravityComponent(Component):
     """Enables the entity to respond to the force of gravity."""
 
-    def __init__(self, weight=60):
+    def __init__(self, weight=56):
         super().__init__()
         self.GRAVITY = weight
         self.DISCRETE_TIMESTEP = 1 / 60
@@ -193,7 +194,8 @@ class EntityRigidBodyComponent(Component):
 
     @staticmethod
     def handle_x_collisions(entity, map):
-        """Handles collisions between entity and the terrain along the x-axis."""
+        """Handles collisions between entity and the terrain
+        along the x-axis."""
         colliding_sprites = pg.sprite.spritecollide(
             entity, map.collideable_terrain_group, False)
         for colliding_sprite in colliding_sprites:
@@ -205,7 +207,8 @@ class EntityRigidBodyComponent(Component):
 
     @staticmethod
     def handle_map_boundary_collisions(entity, map):
-        """Handles collisions between entity and the boundaries of the map."""
+        """Handles collisions between entity
+        and the boundaries of the map."""
         map_width = map.rect.width
         if entity.rect.top < 0:
             entity.rect.top = 0

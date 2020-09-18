@@ -1,29 +1,16 @@
 import pygame as pg
 from .entitystate import GameEvent, EntityState, Direction
-from .spritesheet import SpriteSheet
-from .animation import Animation, EntityAnimationComponent
-from modules.component import SoundComponent, RenderComponent, EnemyDamageComponent
-from modules.physics import UserControlComponent, EntityGravityComponent, EntityRigidBodyComponent
+from .animation import EntityAnimationComponent
+from .component import SoundComponent, RenderComponent, EnemyDamageComponent
+from .physics import UserControlComponent, EntityGravityComponent, EntityRigidBodyComponent
+from .libraries import Library
 
 
 class Entity(pg.sprite.Sprite):
-    """Players and Enemies are defined as Entities in the game. Entities have
-    their position stored in their rect attribute, which is updated every frame
-    according to its x- and y-velocities. They also have states enumerated in the
-    class EntityState. The Entity class defines functions to access and modify
-    the Entity's state, direction and velocities."""
 
     def __init__(self):
-        # TODO: Make velocity, direction and state information private
-        # TODO: Entities should have methods that support the modification
-        #  of its attributes. Components should call these methods instead
-        #  of directly accessing these attributes.
-
         super().__init__()
-
         self.rect = None
-        """Defines the entity's position."""
-
         self.x_velocity = 0              
         self.y_velocity = 0
         self.direction = Direction.RIGHT
@@ -31,9 +18,6 @@ class Entity(pg.sprite.Sprite):
 
     def update(self, *args):
         raise NotImplementedError
-
-    def message(self, message):
-        pass
 
     def set_x_velocity(self, new_x_velocity):
         self.x_velocity = new_x_velocity
@@ -64,47 +48,22 @@ class Entity(pg.sprite.Sprite):
 
 
 class Player(Entity):
-    """Represents the player character"""
 
     def __init__(self):
         super().__init__()
         self.health = 100
         self.rect = pg.Rect(10, 10, 20, 30)
-        # blit rect x coord changed from 50 to 30
         self.blit_rect = pg.Rect(15, 3.5, 20, 30)
-        self.last_collide_time = 0
 
-        idle_spritesheet = SpriteSheet("assets/textures/player/adventurer-idle.png", 1, 4)
-        run_spritesheet = SpriteSheet("assets/textures/player/adventurer-run.png", 1, 6)
-        jump_spritesheet = SpriteSheet("assets/textures/player/adventurer-jump.png", 1, 1)
-        climb_spritesheet = SpriteSheet("assets/textures/player/adventurer-climb.png", 1, 4)
-        animation_library = {
-                            EntityState.IDLE: Animation.of_entire_sheet(idle_spritesheet),
-                            EntityState.WALKING: Animation.of_entire_sheet(run_spritesheet),
-                            EntityState.JUMPING: Animation.of_entire_sheet(jump_spritesheet),
-                            EntityState.HANGING: Animation.of_selected_images(climb_spritesheet, 0, 0),
-                            EntityState.CLIMBING: Animation.of_entire_sheet(climb_spritesheet)
-                            }
-
-        # Sounds
-        jump_sound = pg.mixer.Sound("assets/sound/sfx/jump.ogg")
-        hit_sound = pg.mixer.Sound("assets/sound/sfx/hitdamage.ogg")
-
-        sound_library = {
-                         "JUMP": jump_sound,
-                         "HIT": hit_sound
-                        }
-
-        # Components
         self.input_component = UserControlComponent(self)
-        self.animation_component = EntityAnimationComponent(self, animation_library)
-        self.sound_component = SoundComponent(sound_library)
+        self.animation_component = EntityAnimationComponent(self, Library.player_animations)
+        self.sound_component = SoundComponent(Library.entity_sounds)
         self.render_component = RenderComponent()
         self.gravity_component = EntityGravityComponent()
         self.rigid_body_component = EntityRigidBodyComponent()
 
-        # Current Image
         self.image = self.animation_component.get_initial_image()
+        self.last_collide_time = 0
 
     def take_damage(self, damage):
         """Decreases the health of the player by the specified amount"""
@@ -152,7 +111,7 @@ class Player(Entity):
 
 
 class Enemy(Entity):
-    """Base class for all enemies"""
+
     def __init__(self,
                  type_object,
                  ai_component,
@@ -205,80 +164,37 @@ class Enemy(Entity):
 
 
 class EnemyType:
-    """Template object representing the type of enemy, which is passed into the Enemy constructor to
-        instantiate an Enemy with the corresponding visuals, health and sounds"""
+    """Template object representing the type of enemy, which
+    is passed into the Enemy constructor to instantiate an
+    Enemy with the corresponding visuals, health and sounds."""
+
     def __init__(self):
         self.health = 100
         self.animation_library = {}
-
-        jump_sound = pg.mixer.Sound("assets/sound/sfx/jump.ogg")
-        self.sound_library = {
-            "JUMP": jump_sound
-        }
+        self.sound_library = Library.entity_sounds
 
 
 class PinkGuy(EnemyType):
     def __init__(self):
         super().__init__()
-
-        # Figure out these attributes via inspection every time a new enemy type is implemented
         width = 32
         height = 32
         self.rect = pg.Rect(0, 0, width, height)
         self.blit_rect = pg.Rect(0, 0, width, height)
-
-        idle_spritesheet = SpriteSheet("assets/textures/enemies/Pink Guy/Idle.png", 1, 11)
-        run_spritesheet = SpriteSheet("assets/textures/enemies/Pink Guy/Run.png", 1, 12)
-        jump_spritesheet = SpriteSheet("assets/textures/enemies/Pink Guy/Jump.png", 1, 1)
-        self.animation_library = {
-            EntityState.IDLE: Animation.of_entire_sheet(idle_spritesheet),
-            EntityState.WALKING: Animation.of_entire_sheet(run_spritesheet),
-            EntityState.JUMPING: Animation.of_entire_sheet(jump_spritesheet),
-            EntityState.DEAD: Animation.of_selected_images(idle_spritesheet, 0, 0)
-        }
+        self.animation_library = Library.pink_guy_animations
 
 
 class TrashMonster(EnemyType):
     def __init__(self):
         super().__init__()
-        image_width = 44
-        image_height = 32
         self.rect = pg.Rect(0, 0, 35, 32)
         self.blit_rect = pg.Rect(4, 0, 35, 32)
-
-        idle_spritesheet = SpriteSheet("assets/textures/enemies/Trash Monster/Trash Monster-Idle.png", 1, 6)\
-            .scale(image_width, image_height)
-        run_spritesheet = SpriteSheet("assets/textures/enemies/Trash Monster/Trash Monster-Run.png", 1, 6)\
-            .scale(image_width, image_height)
-        jump_spritesheet = SpriteSheet("assets/textures/enemies/Trash Monster/Trash Monster-Jump.png", 1, 1)\
-            .scale(image_width, image_height)
-
-        self.animation_library = {
-            EntityState.IDLE: Animation.of_entire_sheet(idle_spritesheet, flip=True),
-            EntityState.WALKING: Animation.of_entire_sheet(run_spritesheet, flip=True),
-            EntityState.JUMPING: Animation.of_entire_sheet(jump_spritesheet, flip=True),
-            EntityState.DEAD: Animation.of_selected_images(idle_spritesheet, 0, 0, flip=True)
-        }
+        self.animation_library = Library.trash_monster_animations
 
 
 class ToothWalker(EnemyType):
     def __init__(self):
         super().__init__()
-        image_width = 100
-        image_height = 65
         self.rect = pg.Rect(0, 0, 30, 65)
         self.blit_rect = pg.Rect(40, 0, 30, 65)
-
-        walk_spritesheet = SpriteSheet("assets/textures/enemies/Tooth Walker/tooth walker walk.png", 1, 6)\
-            .scale(image_width, image_height)
-        dead_spritesheet = SpriteSheet("assets/textures/enemies/Tooth Walker/tooth walker dead.png", 1, 1)\
-            .scale(image_width, image_height)
-
-        self.animation_library = \
-            {
-            EntityState.IDLE: Animation.of_selected_images(walk_spritesheet, 0, 0),
-            EntityState.WALKING: Animation.of_entire_sheet(walk_spritesheet),
-            EntityState.JUMPING: Animation.of_selected_images(walk_spritesheet, 0, 0),
-            EntityState.DEAD: Animation.of_entire_sheet(dead_spritesheet)
-            }
-
+        self.animation_library = Library.tooth_walker_animations

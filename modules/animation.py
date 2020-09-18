@@ -75,3 +75,5 @@ class EntityAnimationComponent(Component):
             self.current_state = new_state
             self.current_animation = self.animations[self.current_state]
         self.entity.image = self.current_animation.get_next_image()
+
+
