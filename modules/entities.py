@@ -1,7 +1,7 @@
 import pygame as pg
 from .entitystate import GameEvent, EntityState, Direction
-from .spritesheet import Spritesheet, Animation
-from .animation import EntityAnimationComponent
+from .spritesheet import Spritesheet
+from .animation import Animation, EntityAnimationComponent
 from modules.component import SoundComponent, RenderComponent, EnemyDamageComponent
 from modules.physics import UserControlComponent, PhysicsComponent
 
@@ -79,11 +79,11 @@ class Player(Entity):
         jump_spritesheet = Spritesheet("assets/textures/player/adventurer-jump.png", 1, 1)
         climb_spritesheet = Spritesheet("assets/textures/player/adventurer-climb.png", 1, 4)
         animation_library = {
-                            EntityState.IDLE: Animation(idle_spritesheet, 0, 3).images,
-                            EntityState.WALKING: Animation(run_spritesheet, 0, 5).images,
-                            EntityState.JUMPING: Animation(jump_spritesheet, 0, 0).images,
-                            EntityState.HANGING: Animation(climb_spritesheet, 0, 0).images,
-                            EntityState.CLIMBING: Animation(climb_spritesheet, 0, 3).images
+                            EntityState.IDLE: Animation(idle_spritesheet, 0, 3),
+                            EntityState.WALKING: Animation(run_spritesheet, 0, 5),
+                            EntityState.JUMPING: Animation(jump_spritesheet, 0, 0),
+                            EntityState.HANGING: Animation(climb_spritesheet, 0, 0),
+                            EntityState.CLIMBING: Animation(climb_spritesheet, 0, 3)
                             }
 
         # Sounds
@@ -231,10 +231,10 @@ class PinkGuy(EnemyType):
         run_spritesheet = Spritesheet("assets/textures/enemies/Pink Guy/Run.png", 1, 12)
         jump_spritesheet = Spritesheet("assets/textures/enemies/Pink Guy/Jump.png", 1, 1)
         self.animation_library = {
-            EntityState.IDLE: Animation(idle_spritesheet, 0, 10).images,
-            EntityState.WALKING: Animation(run_spritesheet, 0, 11).images,
-            EntityState.JUMPING: Animation(jump_spritesheet, 0, 0).images,
-            EntityState.DEAD: Animation(idle_spritesheet, 0, 0).images
+            EntityState.IDLE: Animation(idle_spritesheet, 0, 10),
+            EntityState.WALKING: Animation(run_spritesheet, 0, 11),
+            EntityState.JUMPING: Animation(jump_spritesheet, 0, 0),
+            EntityState.DEAD: Animation(idle_spritesheet, 0, 0)
         }
 
 
@@ -255,10 +255,10 @@ class TrashMonster(EnemyType):
         jump_spritesheet.scale_images_to_size(image_width, image_height)
 
         self.animation_library = {
-            EntityState.IDLE: Animation(idle_spritesheet, 0, 5, flip=True).images,
-            EntityState.WALKING: Animation(run_spritesheet, 0, 5, flip=True).images,
-            EntityState.JUMPING: Animation(jump_spritesheet, 0, 0, flip=True).images,
-            EntityState.DEAD: Animation(idle_spritesheet, 0, 0, flip=True).images
+            EntityState.IDLE: Animation(idle_spritesheet, 0, 5, flip=True),
+            EntityState.WALKING: Animation(run_spritesheet, 0, 5, flip=True),
+            EntityState.JUMPING: Animation(jump_spritesheet, 0, 0, flip=True),
+            EntityState.DEAD: Animation(idle_spritesheet, 0, 0, flip=True)
         }
 
 
@@ -278,8 +278,8 @@ class ToothWalker(EnemyType):
 
         self.animation_library = \
             {
-            EntityState.IDLE: Animation(walk_spritesheet, 0, 0).images,
-            EntityState.WALKING: Animation(walk_spritesheet, 0, 5).images,
-            EntityState.JUMPING: Animation(walk_spritesheet, 0, 0).images,
-            EntityState.DEAD: Animation(dead_spritesheet, 0, 0).images
+            EntityState.IDLE: Animation(walk_spritesheet, 0, 0),
+            EntityState.WALKING: Animation(walk_spritesheet, 0, 5),
+            EntityState.JUMPING: Animation(walk_spritesheet, 0, 0),
+            EntityState.DEAD: Animation(dead_spritesheet, 0, 0)
             }
