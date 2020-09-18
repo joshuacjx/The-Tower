@@ -16,7 +16,7 @@ class Component:
         #  the relevant information should be stored as attributes.
         pass
 
-    def receive(self, message):
+    def receive(self, *args):
         pass
 
 

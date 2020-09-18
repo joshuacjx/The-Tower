@@ -156,7 +156,6 @@ class Enemy(Entity):
     def __init__(self,
                  type_object,
                  ai_component,
-                 physics_component,
                  render_component,
                  starting_position,
                  patrol_radius=25
@@ -170,12 +169,10 @@ class Enemy(Entity):
         self.right_bound = starting_position[0] + patrol_radius
 
         self.input_component = ai_component
-        self.physics_component = physics_component
         self.render_component = render_component
-
         self.damage_component = EnemyDamageComponent(self)
-
-        # Animation and sound are taken from a type object
+        self.gravity_component = EntityGravityComponent()
+        self.rigid_body_component = EntityRigidBodyComponent()
         self.animation_component = EntityAnimationComponent(self, type_object.animation_library)
         self.sound_component = SoundComponent(type_object.sound_library)
 
@@ -198,7 +195,8 @@ class Enemy(Entity):
     
     def update(self, delta_time, map, player):
         self.input_component.update(self)
-        self.physics_component.update(delta_time, self, map)
+        self.gravity_component.update(self, delta_time)
+        self.rigid_body_component.update(self, delta_time, map)
         self.damage_component.update(player, map)
         self.animation_component.update()
 

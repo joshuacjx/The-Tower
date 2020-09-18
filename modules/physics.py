@@ -102,6 +102,8 @@ class EnemyMovementComponent(Component):
     """Handles the back and forth movement of
     the Enemy sprites between two points."""
 
+    # TODO: Add implementation for reversing direction when colliding with sprites
+
     def __init__(self, walking_speed=90):
         super().__init__()
         self.walking_speed = walking_speed
@@ -120,6 +122,15 @@ class EnemyMovementComponent(Component):
             else:
                 enemy.reverse_direction()
                 enemy.set_x_velocity(-self.walking_speed)
+
+    # def receive(self, enemy, message):
+    #     if message is "LEFT COLLISION":
+    #         enemy.set_direction(Direction.RIGHT)
+    #         enemy.reverse_x_velocity()
+    #     if message is "RIGHT COLLISION":
+    #         enemy.set_direction(Direction.LEFT)
+    #         enemy.reverse_x_velocity()
+
 
 
 class EntityGravityComponent(Component):

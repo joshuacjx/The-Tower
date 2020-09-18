@@ -209,13 +209,11 @@ class EnemyManager:
                             "Tooth Walker": ToothWalker()
                            }
         self.ai = EnemyMovementComponent()
-        self.physics = EnemyPhysicsComponent()
         self.renderer = RenderComponent()
 
         for enemy_dict in enemies_list:
             self.enemies.add(Enemy(self.enemy_type[enemy_dict["type"]],
                                    self.ai,
-                                   self.physics,
                                    self.renderer,
                                    enemy_dict["coordinates"],
                                    50)
