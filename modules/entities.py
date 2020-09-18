@@ -79,11 +79,11 @@ class Player(Entity):
         jump_spritesheet = SpriteSheet("assets/textures/player/adventurer-jump.png", 1, 1)
         climb_spritesheet = SpriteSheet("assets/textures/player/adventurer-climb.png", 1, 4)
         animation_library = {
-                            EntityState.IDLE: Animation(idle_spritesheet, 0, 3),
-                            EntityState.WALKING: Animation(run_spritesheet, 0, 5),
-                            EntityState.JUMPING: Animation(jump_spritesheet, 0, 0),
-                            EntityState.HANGING: Animation(climb_spritesheet, 0, 0),
-                            EntityState.CLIMBING: Animation(climb_spritesheet, 0, 3)
+                            EntityState.IDLE: Animation.of_entire_sheet(idle_spritesheet),
+                            EntityState.WALKING: Animation.of_entire_sheet(run_spritesheet),
+                            EntityState.JUMPING: Animation.of_entire_sheet(jump_spritesheet),
+                            EntityState.HANGING: Animation.of_selected_images(climb_spritesheet, 0, 0),
+                            EntityState.CLIMBING: Animation.of_entire_sheet(climb_spritesheet)
                             }
 
         # Sounds
@@ -231,10 +231,10 @@ class PinkGuy(EnemyType):
         run_spritesheet = SpriteSheet("assets/textures/enemies/Pink Guy/Run.png", 1, 12)
         jump_spritesheet = SpriteSheet("assets/textures/enemies/Pink Guy/Jump.png", 1, 1)
         self.animation_library = {
-            EntityState.IDLE: Animation(idle_spritesheet, 0, 10),
-            EntityState.WALKING: Animation(run_spritesheet, 0, 11),
-            EntityState.JUMPING: Animation(jump_spritesheet, 0, 0),
-            EntityState.DEAD: Animation(idle_spritesheet, 0, 0)
+            EntityState.IDLE: Animation.of_entire_sheet(idle_spritesheet),
+            EntityState.WALKING: Animation.of_entire_sheet(run_spritesheet),
+            EntityState.JUMPING: Animation.of_entire_sheet(jump_spritesheet),
+            EntityState.DEAD: Animation.of_selected_images(idle_spritesheet, 0, 0)
         }
 
 
@@ -246,19 +246,18 @@ class TrashMonster(EnemyType):
         self.rect = pg.Rect(0, 0, 35, 32)
         self.blit_rect = pg.Rect(4, 0, 35, 32)
 
-        idle_spritesheet = SpriteSheet("assets/textures/enemies/Trash Monster/Trash Monster-Idle.png", 1, 6)
-        run_spritesheet = SpriteSheet("assets/textures/enemies/Trash Monster/Trash Monster-Run.png", 1, 6)
-        jump_spritesheet = SpriteSheet("assets/textures/enemies/Trash Monster/Trash Monster-Jump.png", 1, 1)
-
-        idle_spritesheet.scale(image_width, image_height)
-        run_spritesheet.scale(image_width, image_height)
-        jump_spritesheet.scale(image_width, image_height)
+        idle_spritesheet = SpriteSheet("assets/textures/enemies/Trash Monster/Trash Monster-Idle.png", 1, 6)\
+            .scale(image_width, image_height)
+        run_spritesheet = SpriteSheet("assets/textures/enemies/Trash Monster/Trash Monster-Run.png", 1, 6)\
+            .scale(image_width, image_height)
+        jump_spritesheet = SpriteSheet("assets/textures/enemies/Trash Monster/Trash Monster-Jump.png", 1, 1)\
+            .scale(image_width, image_height)
 
         self.animation_library = {
-            EntityState.IDLE: Animation(idle_spritesheet, 0, 5, flip=True),
-            EntityState.WALKING: Animation(run_spritesheet, 0, 5, flip=True),
-            EntityState.JUMPING: Animation(jump_spritesheet, 0, 0, flip=True),
-            EntityState.DEAD: Animation(idle_spritesheet, 0, 0, flip=True)
+            EntityState.IDLE: Animation.of_entire_sheet(idle_spritesheet, flip=True),
+            EntityState.WALKING: Animation.of_entire_sheet(run_spritesheet, flip=True),
+            EntityState.JUMPING: Animation.of_entire_sheet(jump_spritesheet, flip=True),
+            EntityState.DEAD: Animation.of_selected_images(idle_spritesheet, 0, 0, flip=True)
         }
 
 
@@ -277,8 +276,9 @@ class ToothWalker(EnemyType):
 
         self.animation_library = \
             {
-            EntityState.IDLE: Animation(walk_spritesheet, 0, 0),
-            EntityState.WALKING: Animation(walk_spritesheet, 0, 5),
-            EntityState.JUMPING: Animation(walk_spritesheet, 0, 0),
-            EntityState.DEAD: Animation(dead_spritesheet, 0, 0)
+            EntityState.IDLE: Animation.of_selected_images(walk_spritesheet, 0, 0),
+            EntityState.WALKING: Animation.of_entire_sheet(walk_spritesheet),
+            EntityState.JUMPING: Animation.of_selected_images(walk_spritesheet, 0, 0),
+            EntityState.DEAD: Animation.of_entire_sheet(dead_spritesheet)
             }
+

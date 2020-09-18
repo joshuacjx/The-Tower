@@ -3,16 +3,23 @@ from .component import Component
 
 
 class Animation:
-    # TODO: Make further encapsulation by making the constructor
-    #  simply take in a list of images. Also make static of() methods
-    #  for a filepath, and for a SpriteSheet.
 
-    def __init__(self, sprite_sheet, start, end, flip=False, speed=5):
-        self.images = sprite_sheet.get_image_subsequence(start, end, flip)
+    def __init__(self, images, speed=5):
+        self.images = images
         self.current_index = 0
         self.frame_counter = 0
         self.FRAMES_PER_UPDATE = speed
         self.animation_length = len(self.images)
+
+    @staticmethod
+    def of_entire_sheet(sprite_sheet, flip=False, speed=5):
+        images = sprite_sheet.get_image_sequence(flip)
+        return Animation(images, speed)
+
+    @staticmethod
+    def of_selected_images(sprite_sheet, start, end, flip=False, speed=5):
+        images = sprite_sheet.get_image_subsequence(start, end, flip)
+        return Animation(images, speed)
 
     def get_image_at(self, index):
         return self.images[index]

@@ -136,7 +136,7 @@ class Coin(Block):
     def __init__(self, type_object, x, y):
         super().__init__(type_object, x, y)
         spritesheet = SpriteSheet("assets/textures/environment/animated/ruby.png", 1, 16)
-        coin_animation = Animation(spritesheet, 0, 15)
+        coin_animation = Animation.of_entire_sheet(spritesheet)
         self.animation_component = TerrainAnimationComponent(self, coin_animation)
         self.coin_sound = pg.mixer.Sound("assets/sound/sfx/coin.ogg")
 

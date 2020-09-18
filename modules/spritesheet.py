@@ -55,9 +55,8 @@ class SpriteSheet:
         all images in the SpriteSheet are part of a single
         Animation."""
 
-        num_images = self.rows * self.columns
+        num_images = self.rows * self.columns - 1
         return self.get_image_subsequence(0, num_images, flip)
-
 
     def scale(self, new_width, new_height):
         """Scales each image in the SpriteSheet to the
