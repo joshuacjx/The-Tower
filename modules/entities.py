@@ -2,7 +2,7 @@ import pygame as pg
 from .entitystate import GameEvent, EntityState, Direction
 from .animation import EntityAnimationComponent
 from .component import SoundComponent, RenderComponent, EnemyDamageComponent
-from .physics import UserControlComponent, EntityGravityComponent, EntityRigidBodyComponent
+from .physics import UserControlComponent, EntityGravityComponent, EntityRigidBodyComponent, EnemyRigidBodyComponent
 from .libraries import Library
 
 
@@ -17,6 +17,9 @@ class Entity(pg.sprite.Sprite):
         self.state = EntityState.IDLE
 
     def update(self, *args):
+        raise NotImplementedError
+
+    def receive(self, message):
         raise NotImplementedError
 
     def set_x_velocity(self, new_x_velocity):
@@ -35,10 +38,7 @@ class Entity(pg.sprite.Sprite):
         self.direction = new_direction
 
     def reverse_direction(self):
-        if self.direction is Direction.LEFT:
-            self.direction = Direction.RIGHT
-        elif self.direction is Direction.RIGHT:
-            self.direction = Direction.LEFT
+        self.set_direction(self.get_direction().get_reverse())
 
     def get_state(self):
         return self.state
@@ -131,7 +131,7 @@ class Enemy(Entity):
         self.render_component = render_component
         self.damage_component = EnemyDamageComponent(self)
         self.gravity_component = EntityGravityComponent()
-        self.rigid_body_component = EntityRigidBodyComponent()
+        self.rigid_body_component = EnemyRigidBodyComponent()
         self.animation_component = EntityAnimationComponent(self, type_object.animation_library)
         self.sound_component = SoundComponent(type_object.sound_library)
 

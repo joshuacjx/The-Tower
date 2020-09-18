@@ -112,24 +112,11 @@ class AIControlComponent(Component):
                 enemy.set_x_velocity(-self.walking_speed)
             else:
                 enemy.reverse_direction()
-                enemy.set_x_velocity(self.walking_speed)
         elif enemy.get_direction() is Direction.RIGHT:
             if enemy.rect.x < enemy.right_bound:
                 enemy.set_x_velocity(self.walking_speed)
             else:
                 enemy.reverse_direction()
-                enemy.set_x_velocity(-self.walking_speed)
-
-        # FIXME: Reverse of direction after collision
-        #  should be implemented via message-passing.
-        colliding_sprites = pg.sprite.spritecollide(
-            enemy, map.collideable_terrain_group, False)
-        for colliding_sprite in colliding_sprites:
-            if is_colliding_from_left(enemy, colliding_sprite):
-                enemy.set_direction(Direction.RIGHT)
-            elif is_colliding_from_right(enemy, colliding_sprite):
-                enemy.set_direction(Direction.LEFT)
-            enemy.reverse_x_velocity()
 
 
 class EntityGravityComponent(Component):
@@ -155,8 +142,6 @@ class EntityGravityComponent(Component):
 class EntityRigidBodyComponent(Component):
     """Enables the entity to move based on its velocity
     and respond to collisions with other sprites."""
-    # TODO: Further split this into an InertiaComponent which
-    #  takes care of its displacement wrt its velocities
 
     def __init__(self):
         super().__init__()
@@ -216,6 +201,25 @@ class EntityRigidBodyComponent(Component):
             entity.rect.left = 0
         elif entity.rect.right > map_width:
             entity.rect.right = map_width
+
+
+class EnemyRigidBodyComponent(EntityRigidBodyComponent):
+    def __init__(self):
+        super().__init__()
+
+    @staticmethod
+    def handle_x_collisions(enemy, map):
+        colliding_sprites = pg.sprite.spritecollide(
+            enemy, map.collideable_terrain_group, False)
+        for colliding_sprite in colliding_sprites:
+            if is_colliding_from_right(enemy, colliding_sprite):
+                enemy.rect.left = colliding_sprite.rect.right
+                enemy.set_direction(Direction.RIGHT)
+                enemy.reverse_x_velocity()
+            if is_colliding_from_left(enemy, colliding_sprite):
+                enemy.rect.right = colliding_sprite.rect.left
+                enemy.set_direction(Direction.LEFT)
+                enemy.reverse_x_velocity()
 
 
 def is_colliding_from_below(entity, colliding_sprite):

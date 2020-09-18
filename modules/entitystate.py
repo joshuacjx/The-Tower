@@ -21,6 +21,12 @@ class Direction(Enum):
     LEFT = 0
     RIGHT = 1
 
+    def get_reverse(self):
+        if self is Direction.LEFT:
+            return Direction.RIGHT
+        if self is Direction.RIGHT:
+            return Direction.LEFT
+
 
 class Action(Enum):
     WALK = 0
