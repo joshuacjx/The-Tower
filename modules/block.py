@@ -1,5 +1,5 @@
 import pygame as pg
-from modules.component import TerrainAnimationComponent
+from modules.animation import TerrainAnimationComponent
 from .entitystate import GameEvent, EntityState, Direction
 from .spritesheet import Spritesheet, TerrainType
 
