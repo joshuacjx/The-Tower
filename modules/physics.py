@@ -35,8 +35,8 @@ class UserControlComponent(Component):
             self.handle_climbing_entity(is_pressed)
 
     def handle_idle_entity(self, is_pressed: dict):
-        self.entity.set_x_velocity(self.ZERO_VELOCITY)
-        self.entity.set_y_velocity(self.ZERO_VELOCITY)
+        # self.entity.set_x_velocity(self.ZERO_VELOCITY)
+        # self.entity.set_y_velocity(self.ZERO_VELOCITY)
         if is_pressed[pg.K_LEFT]:
             self.entity.set_state(EntityState.WALKING)
             self.entity.set_direction(Direction.LEFT)
@@ -120,6 +120,91 @@ class EnemyMovementComponent(Component):
             else:
                 enemy.reverse_direction()
                 enemy.set_x_velocity(-self.walking_speed)
+
+
+class EntityGravityComponent(Component):
+    """Enables the entity to respond to the force of gravity."""
+
+    def __init__(self, weight=60):
+        super().__init__()
+        self.GRAVITY = weight
+        self.DISCRETE_TIMESTEP = 1 / 60
+
+    def update(self, entity, delta_time):
+        num_full_steps = int(delta_time / self.DISCRETE_TIMESTEP)
+        remainder_time = delta_time % self.DISCRETE_TIMESTEP
+        is_on_chain = entity.get_state() is EntityState.CLIMBING \
+                      or entity.get_state() is EntityState.HANGING
+        for i in range(0, num_full_steps):
+            if not is_on_chain:
+                entity.y_velocity += int(self.GRAVITY * self.DISCRETE_TIMESTEP * 60)
+        if not is_on_chain:
+            entity.y_velocity += int(self.GRAVITY * remainder_time * 60)
+
+
+class EntityRigidBodyComponent(Component):
+    """Enables the entity to move based on its velocity
+    and respond to collisions with other sprites."""
+    # TODO: Further split this into an InertiaComponent which
+    #  takes care of its displacement wrt its velocities
+
+    def __init__(self):
+        super().__init__()
+        self.DISCRETE_TIMESTEP = 1 / 60
+
+    def update(self, entity, delta_time, game_map):
+        num_full_steps = int(delta_time / self.DISCRETE_TIMESTEP)
+        remainder_time = delta_time % self.DISCRETE_TIMESTEP
+        for i in range(0, num_full_steps):
+            entity.rect.y += int(entity.y_velocity * self.DISCRETE_TIMESTEP)
+            self.handle_y_collisions(entity, game_map)
+            entity.rect.x += int(entity.x_velocity * self.DISCRETE_TIMESTEP)
+            self.handle_x_collisions(entity, game_map)
+        entity.rect.y += int(entity.y_velocity * remainder_time)
+        if int(entity.y_velocity * remainder_time) != 0:
+            self.handle_y_collisions(entity, game_map)
+        entity.rect.x += int(entity.x_velocity * remainder_time)
+        self.handle_x_collisions(entity, game_map)
+        self.handle_map_boundary_collisions(entity, game_map)
+
+    @staticmethod
+    def handle_y_collisions(entity, map):
+        """Handles collisions between entity and the terrain along the y-axis."""
+        colliding_sprites = pg.sprite.spritecollide(
+            entity, map.collideable_terrain_group, False)
+        for colliding_sprite in colliding_sprites:
+            if is_colliding_from_below(entity, colliding_sprite):
+                entity.rect.top = colliding_sprite.rect.bottom
+                entity.set_y_velocity(0)
+            if is_colliding_from_above(entity, colliding_sprite):
+                if entity.get_state() is EntityState.JUMPING:
+                    entity.set_state(EntityState.IDLE)
+                entity.rect.bottom = colliding_sprite.rect.top
+                entity.set_y_velocity(0)
+
+    @staticmethod
+    def handle_x_collisions(entity, map):
+        """Handles collisions between entity and the terrain along the x-axis."""
+        colliding_sprites = pg.sprite.spritecollide(
+            entity, map.collideable_terrain_group, False)
+        for colliding_sprite in colliding_sprites:
+            if not colliding_sprite.is_spike:
+                if is_colliding_from_right(entity, colliding_sprite):
+                    entity.rect.left = colliding_sprite.rect.right
+                if is_colliding_from_left(entity, colliding_sprite):
+                    entity.rect.right = colliding_sprite.rect.left
+
+    @staticmethod
+    def handle_map_boundary_collisions(entity, map):
+        """Handles collisions between entity and the boundaries of the map."""
+        map_width = map.rect.width
+        if entity.rect.top < 0:
+            entity.rect.top = 0
+        if entity.rect.left < 0:
+            entity.rect.left = 0
+        elif entity.rect.right > map_width:
+            entity.rect.right = map_width
+
 
 
 class PhysicsComponent(Component):

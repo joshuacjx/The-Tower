@@ -3,7 +3,7 @@ from .entitystate import GameEvent, EntityState, Direction
 from .spritesheet import Spritesheet
 from .animation import Animation, EntityAnimationComponent
 from modules.component import SoundComponent, RenderComponent, EnemyDamageComponent
-from modules.physics import UserControlComponent, PhysicsComponent
+from modules.physics import UserControlComponent, PhysicsComponent, EntityGravityComponent, EntityRigidBodyComponent
 
 
 class Entity(pg.sprite.Sprite):
@@ -98,9 +98,10 @@ class Player(Entity):
         # Components
         self.input_component = UserControlComponent(self)
         self.animation_component = EntityAnimationComponent(self, animation_library)
-        self.physics_component = PhysicsComponent()
         self.sound_component = SoundComponent(sound_library)
         self.render_component = RenderComponent()
+        self.gravity_component = EntityGravityComponent()
+        self.rigid_body_component = EntityRigidBodyComponent()
 
         # Current Image
         self.image = self.animation_component.get_initial_image()
@@ -142,8 +143,9 @@ class Player(Entity):
                 )
             )
         else:
-            self.physics_component.update(delta_time, self, map)
             self.animation_component.update()
+            self.gravity_component.update(self, delta_time)
+            self.rigid_body_component.update(self, delta_time, map)
 
     def render(self, camera, surface):
         self.render_component.update(self, camera, surface)
