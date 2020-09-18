@@ -1,7 +1,7 @@
 import pygame as pg
 from .animation import Animation, TerrainAnimationComponent
 from .entitystate import GameEvent, EntityState, Direction
-from .spritesheet import Spritesheet
+from .spritesheet import SpriteSheet
 from .textureset import TerrainType
 
 """
@@ -135,7 +135,7 @@ class Coin(Block):
 
     def __init__(self, type_object, x, y):
         super().__init__(type_object, x, y)
-        spritesheet = Spritesheet("assets/textures/environment/animated/ruby.png", 1, 16)
+        spritesheet = SpriteSheet("assets/textures/environment/animated/ruby.png", 1, 16)
         coin_animation = Animation(spritesheet, 0, 15)
         self.animation_component = TerrainAnimationComponent(self, coin_animation)
         self.coin_sound = pg.mixer.Sound("assets/sound/sfx/coin.ogg")

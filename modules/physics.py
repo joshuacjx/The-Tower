@@ -35,6 +35,7 @@ class UserControlComponent(Component):
             self.handle_climbing_entity(is_pressed)
 
     def handle_idle_entity(self, is_pressed: dict):
+        self.entity.set_x_velocity(self.ZERO_VELOCITY)
         if is_pressed[pg.K_LEFT]:
             self.entity.set_state(EntityState.WALKING)
             self.entity.set_direction(Direction.LEFT)
@@ -119,6 +120,7 @@ class AIControlComponent(Component):
                 enemy.reverse_direction()
                 enemy.set_x_velocity(-self.walking_speed)
 
+        # FIXME: Reverse of direction after collision should be implemented via message-passing.
         colliding_sprites = pg.sprite.spritecollide(
             enemy, map.collideable_terrain_group, False)
         for colliding_sprite in colliding_sprites:

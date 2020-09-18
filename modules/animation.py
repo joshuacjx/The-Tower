@@ -4,11 +4,11 @@ from .component import Component
 
 class Animation:
     # TODO: Make further encapsulation by making the constructor
-    #  simply take in a filepath to the directory and transform
-    #  it into a list of Surfaces
+    #  simply take in a list of images. Also make static of() methods
+    #  for a filepath, and for a SpriteSheet.
 
     def __init__(self, sprite_sheet, start, end, flip=False, speed=5):
-        self.images = sprite_sheet.get_images_at(start, end, flip)
+        self.images = sprite_sheet.get_image_subsequence(start, end, flip)
         self.current_index = 0
         self.frame_counter = 0
         self.FRAMES_PER_UPDATE = speed
@@ -46,9 +46,9 @@ class EntityAnimationComponent(Component):
     def __init__(self, entity, animations: dict):
         """Creates an Entity Animation Component.
 
-        :param entity: The entity that contains this component.
-        :param animations: A dictionary with Entity states
-                            as keys and Animations as values.
+        :param entity:      The entity that contains this component.
+        :param animations:  A dictionary with Entity states as keys
+                            and Animations as values.
         """
         super().__init__()
         self.entity = entity
@@ -61,6 +61,7 @@ class EntityAnimationComponent(Component):
 
     def update(self):
         """Switches to a new Animation if the Entity has changed its state."""
+
         new_state = self.entity.get_state()
         has_changed_state = new_state is not self.current_state
         if has_changed_state:

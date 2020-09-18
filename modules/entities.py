@@ -1,6 +1,6 @@
 import pygame as pg
 from .entitystate import GameEvent, EntityState, Direction
-from .spritesheet import Spritesheet
+from .spritesheet import SpriteSheet
 from .animation import Animation, EntityAnimationComponent
 from modules.component import SoundComponent, RenderComponent, EnemyDamageComponent
 from modules.physics import UserControlComponent, EntityGravityComponent, EntityRigidBodyComponent
@@ -74,10 +74,10 @@ class Player(Entity):
         self.blit_rect = pg.Rect(15, 3.5, 20, 30)
         self.last_collide_time = 0
 
-        idle_spritesheet = Spritesheet("assets/textures/player/adventurer-idle.png", 1, 4)
-        run_spritesheet = Spritesheet("assets/textures/player/adventurer-run.png", 1, 6)
-        jump_spritesheet = Spritesheet("assets/textures/player/adventurer-jump.png", 1, 1)
-        climb_spritesheet = Spritesheet("assets/textures/player/adventurer-climb.png", 1, 4)
+        idle_spritesheet = SpriteSheet("assets/textures/player/adventurer-idle.png", 1, 4)
+        run_spritesheet = SpriteSheet("assets/textures/player/adventurer-run.png", 1, 6)
+        jump_spritesheet = SpriteSheet("assets/textures/player/adventurer-jump.png", 1, 1)
+        climb_spritesheet = SpriteSheet("assets/textures/player/adventurer-climb.png", 1, 4)
         animation_library = {
                             EntityState.IDLE: Animation(idle_spritesheet, 0, 3),
                             EntityState.WALKING: Animation(run_spritesheet, 0, 5),
@@ -227,9 +227,9 @@ class PinkGuy(EnemyType):
         self.rect = pg.Rect(0, 0, width, height)
         self.blit_rect = pg.Rect(0, 0, width, height)
 
-        idle_spritesheet = Spritesheet("assets/textures/enemies/Pink Guy/Idle.png", 1, 11)
-        run_spritesheet = Spritesheet("assets/textures/enemies/Pink Guy/Run.png", 1, 12)
-        jump_spritesheet = Spritesheet("assets/textures/enemies/Pink Guy/Jump.png", 1, 1)
+        idle_spritesheet = SpriteSheet("assets/textures/enemies/Pink Guy/Idle.png", 1, 11)
+        run_spritesheet = SpriteSheet("assets/textures/enemies/Pink Guy/Run.png", 1, 12)
+        jump_spritesheet = SpriteSheet("assets/textures/enemies/Pink Guy/Jump.png", 1, 1)
         self.animation_library = {
             EntityState.IDLE: Animation(idle_spritesheet, 0, 10),
             EntityState.WALKING: Animation(run_spritesheet, 0, 11),
@@ -246,13 +246,13 @@ class TrashMonster(EnemyType):
         self.rect = pg.Rect(0, 0, 35, 32)
         self.blit_rect = pg.Rect(4, 0, 35, 32)
 
-        idle_spritesheet = Spritesheet("assets/textures/enemies/Trash Monster/Trash Monster-Idle.png", 1, 6)
-        run_spritesheet = Spritesheet("assets/textures/enemies/Trash Monster/Trash Monster-Run.png", 1, 6)
-        jump_spritesheet = Spritesheet("assets/textures/enemies/Trash Monster/Trash Monster-Jump.png", 1, 1)
+        idle_spritesheet = SpriteSheet("assets/textures/enemies/Trash Monster/Trash Monster-Idle.png", 1, 6)
+        run_spritesheet = SpriteSheet("assets/textures/enemies/Trash Monster/Trash Monster-Run.png", 1, 6)
+        jump_spritesheet = SpriteSheet("assets/textures/enemies/Trash Monster/Trash Monster-Jump.png", 1, 1)
 
-        idle_spritesheet.scale_images_to_size(image_width, image_height)
-        run_spritesheet.scale_images_to_size(image_width, image_height)
-        jump_spritesheet.scale_images_to_size(image_width, image_height)
+        idle_spritesheet.scale(image_width, image_height)
+        run_spritesheet.scale(image_width, image_height)
+        jump_spritesheet.scale(image_width, image_height)
 
         self.animation_library = {
             EntityState.IDLE: Animation(idle_spritesheet, 0, 5, flip=True),
@@ -270,11 +270,10 @@ class ToothWalker(EnemyType):
         self.rect = pg.Rect(0, 0, 30, 65)
         self.blit_rect = pg.Rect(40, 0, 30, 65)
 
-        walk_spritesheet = Spritesheet("assets/textures/enemies/Tooth Walker/tooth walker walk.png", 1, 6)
-        dead_spritesheet = Spritesheet("assets/textures/enemies/Tooth Walker/tooth walker dead.png", 1, 1)
-
-        walk_spritesheet.scale_images_to_size(image_width, image_height)
-        dead_spritesheet.scale_images_to_size(image_width, image_height)
+        walk_spritesheet = SpriteSheet("assets/textures/enemies/Tooth Walker/tooth walker walk.png", 1, 6)\
+            .scale(image_width, image_height)
+        dead_spritesheet = SpriteSheet("assets/textures/enemies/Tooth Walker/tooth walker dead.png", 1, 1)\
+            .scale(image_width, image_height)
 
         self.animation_library = \
             {
