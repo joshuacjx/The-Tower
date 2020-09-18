@@ -194,7 +194,7 @@ class Enemy(Entity):
         pass
     
     def update(self, delta_time, map, player):
-        self.input_component.update(self)
+        self.input_component.update(self, map)
         self.gravity_component.update(self, delta_time)
         self.rigid_body_component.update(self, delta_time, map)
         self.damage_component.update(player, map)

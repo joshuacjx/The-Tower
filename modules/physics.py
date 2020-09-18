@@ -35,8 +35,6 @@ class UserControlComponent(Component):
             self.handle_climbing_entity(is_pressed)
 
     def handle_idle_entity(self, is_pressed: dict):
-        # self.entity.set_x_velocity(self.ZERO_VELOCITY)
-        # self.entity.set_y_velocity(self.ZERO_VELOCITY)
         if is_pressed[pg.K_LEFT]:
             self.entity.set_state(EntityState.WALKING)
             self.entity.set_direction(Direction.LEFT)
@@ -98,17 +96,15 @@ class UserControlComponent(Component):
             self.entity.set_state(EntityState.HANGING)
 
 
-class EnemyMovementComponent(Component):
+class AIControlComponent(Component):
     """Handles the back and forth movement of
     the Enemy sprites between two points."""
-
-    # TODO: Add implementation for reversing direction when colliding with sprites
 
     def __init__(self, walking_speed=90):
         super().__init__()
         self.walking_speed = walking_speed
 
-    def update(self, enemy):
+    def update(self, enemy, map):
         enemy.set_state(EntityState.WALKING)
         if enemy.get_direction() is Direction.LEFT:
             if enemy.rect.x > enemy.left_bound:
@@ -123,14 +119,14 @@ class EnemyMovementComponent(Component):
                 enemy.reverse_direction()
                 enemy.set_x_velocity(-self.walking_speed)
 
-    # def receive(self, enemy, message):
-    #     if message is "LEFT COLLISION":
-    #         enemy.set_direction(Direction.RIGHT)
-    #         enemy.reverse_x_velocity()
-    #     if message is "RIGHT COLLISION":
-    #         enemy.set_direction(Direction.LEFT)
-    #         enemy.reverse_x_velocity()
-
+        colliding_sprites = pg.sprite.spritecollide(
+            enemy, map.collideable_terrain_group, False)
+        for colliding_sprite in colliding_sprites:
+            if is_colliding_from_left(enemy, colliding_sprite):
+                enemy.set_direction(Direction.RIGHT)
+            elif is_colliding_from_right(enemy, colliding_sprite):
+                enemy.set_direction(Direction.LEFT)
+            enemy.reverse_x_velocity()
 
 
 class EntityGravityComponent(Component):
@@ -218,17 +214,17 @@ class EntityRigidBodyComponent(Component):
 
 
 def is_colliding_from_below(entity, colliding_sprite):
-    return colliding_sprite.rect.top < entity.rect.top < colliding_sprite.rect.bottom
+    return colliding_sprite.rect.top <= entity.rect.top <= colliding_sprite.rect.bottom
 
 
 def is_colliding_from_above(entity, colliding_sprite):
-    return colliding_sprite.rect.top < entity.rect.bottom < colliding_sprite.rect.bottom
+    return colliding_sprite.rect.top <= entity.rect.bottom <= colliding_sprite.rect.bottom
 
 
 def is_colliding_from_right(entity, colliding_sprite):
-    return colliding_sprite.rect.left < entity.rect.left < colliding_sprite.rect.right
+    return colliding_sprite.rect.left <= entity.rect.left <= colliding_sprite.rect.right
 
 
 def is_colliding_from_left(entity, colliding_sprite):
-    return colliding_sprite.rect.left < entity.rect.right < colliding_sprite.rect.right
+    return colliding_sprite.rect.left <= entity.rect.right <= colliding_sprite.rect.right
 

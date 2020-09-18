@@ -4,7 +4,7 @@ from modules.block import Block, FallingBlock, PushableBlock, LadderBlock, Spike
 from modules.entities import Enemy, PinkGuy, TrashMonster, ToothWalker
 from modules.entitystate import GameEvent, EntityState
 from modules.component import RenderComponent
-from modules.physics import EnemyMovementComponent
+from modules.physics import AIControlComponent
 from modules.textureset import TextureSet
 
 """
@@ -208,7 +208,7 @@ class EnemyManager:
                             "Trash Monster": TrashMonster(),
                             "Tooth Walker": ToothWalker()
                            }
-        self.ai = EnemyMovementComponent()
+        self.ai = AIControlComponent()
         self.renderer = RenderComponent()
 
         for enemy_dict in enemies_list:
