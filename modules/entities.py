@@ -103,7 +103,7 @@ class Player(Entity):
         self.render_component = RenderComponent()
 
         # Current Image
-        self.image = self.animation_component.get_current_image()
+        self.image = self.animation_component.get_initial_image()
 
     def take_damage(self, damage):
         """Decreases the health of the player by the specified amount"""
@@ -184,7 +184,7 @@ class Enemy(Entity):
         self.rect.y = starting_position[1]
         self.blit_rect = type_object.blit_rect
 
-        self.image = self.animation_component.get_current_image()
+        self.image = self.animation_component.get_initial_image()
 
     def take_damage(self, damage):
         """Instantly kills the enemy"""
