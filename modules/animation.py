@@ -1,5 +1,7 @@
+import pygame as pg
 from pygame.surface import Surface
 from .component import Component
+from .entitystate import Direction
 
 
 class Animation:
@@ -72,6 +74,10 @@ class EntityAnimationComponent(Component):
         if has_changed_state:
             self.current_state = new_state
             self.current_animation = self.animations[self.current_state]
-        self.entity.image = self.current_animation.get_next_image()
+
+        next_image = self.current_animation.get_next_image()
+        if self.entity.get_direction() is Direction.LEFT:
+            next_image = pg.transform.flip(next_image, True, False)
+        self.entity.image = next_image
 
 

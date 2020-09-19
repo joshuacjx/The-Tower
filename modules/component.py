@@ -1,6 +1,6 @@
 import pygame as pg
 from pygame.surface import Surface
-from .entitystate import Direction, GameEvent, EntityState, EntityMessage
+from .entitystate import GameEvent, EntityState, EntityMessage
 
 
 class Component:
@@ -21,20 +21,19 @@ class Component:
 
 
 class RenderComponent(Component):
+
     def __init__(self):
         super().__init__()
 
     def update(self, entity, camera, game_display: Surface):
         # TODO: Abstract away all the blit_rect logic
         rendered_image = entity.image.subsurface(entity.blit_rect)
-        if entity.get_direction() is Direction.LEFT:
-            # Flip image if Player is moving backward
-            rendered_image = pg.transform.flip(rendered_image, True, False)
         blit_destination = (entity.rect.x - camera.rect.x, entity.rect.y - camera.rect.y)
         game_display.blit(rendered_image, blit_destination)
 
 
 class SoundComponent(Component):
+
     def __init__(self, sounds):
         super().__init__()
         self.sounds = sounds
