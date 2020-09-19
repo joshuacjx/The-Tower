@@ -207,15 +207,13 @@ class EnemyManager:
                             "Trash Monster": TrashMonster(),
                             "Tooth Walker": ToothWalker()
                            }
-        self.ai = AIControlComponent()
         self.renderer = RenderComponent()
 
         for enemy_dict in enemies_list:
             self.enemies.add(Enemy(self.enemy_type[enemy_dict["type"]],
-                                   self.ai,
+                                   AIControlComponent(enemy_dict["coordinates"]),
                                    self.renderer,
-                                   enemy_dict["coordinates"],
-                                   50)
+                                   enemy_dict["coordinates"])
                              )
 
     def update(self, delta_time, map, player):

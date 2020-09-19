@@ -105,20 +105,22 @@ class AIControlComponent(Component):
     """Handles the back and forth movement of
     the Enemy sprites between two points."""
 
-    def __init__(self, walking_speed=90):
+    def __init__(self, starting_position, walking_speed=90, patrol_radius=50):
         super().__init__()
-        self.walking_speed = walking_speed
+        self.WALKING_SPEED = walking_speed
+        self.left_bound = starting_position[0] - patrol_radius
+        self.right_bound = starting_position[0] + patrol_radius
 
     def update(self, enemy, map):
         enemy.set_state(EntityState.WALKING)
         if enemy.get_direction() is Direction.LEFT:
-            if enemy.rect.x > enemy.left_bound:
-                enemy.set_x_velocity(-self.walking_speed)
+            if enemy.rect.x > self.left_bound:
+                enemy.set_x_velocity(-self.WALKING_SPEED)
             else:
                 enemy.reverse_direction()
         elif enemy.get_direction() is Direction.RIGHT:
-            if enemy.rect.x < enemy.right_bound:
-                enemy.set_x_velocity(self.walking_speed)
+            if enemy.rect.x < self.right_bound:
+                enemy.set_x_velocity(self.WALKING_SPEED)
             else:
                 enemy.reverse_direction()
 

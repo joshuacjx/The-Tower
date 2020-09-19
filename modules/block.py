@@ -91,19 +91,6 @@ class FallingBlock(Block):
                     self.rect.bottom = colliding_sprite.rect.top
                     self.fallen = True
 
-        # Block should also fall when a pushable block falls on it
-        # Commented this out because it is still buggy - player's state will fluctuate rapidly
-
-        # for pushable in pushable_group:
-        # 	if (self.rect.top == pushable.rect.bottom)\
-        # 		and (self.rect.left < pushable.rect.left < self.rect.right\
-        # 			or self.rect.left < pushable.rect.right < self.rect.right\
-        # 				or self.rect.left < pushable.rect.centerx < self.rect.right):
-        # 		self.blit_rect.y += self.vel
-        # 		self.rect.y = self.blit_rect.y
-        # 		pushable.rect.bottom = self.rect.top
-        # 		pushable.blit_rect.bottom = pushable.rect.bottom
-
 
 class MovingBlock(Block):
     def __init__(self, type_object, x, y):

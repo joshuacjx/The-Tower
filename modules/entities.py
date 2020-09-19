@@ -10,7 +10,6 @@ class Entity(pg.sprite.Sprite):
 
     def __init__(self):
         super().__init__()
-        self.rect = None
         self.x_velocity = 0              
         self.y_velocity = 0
         self.direction = Direction.RIGHT
@@ -88,22 +87,10 @@ class Player(Entity):
 
 class Enemy(Entity):
 
-    def __init__(self,
-                 type_object,
-                 ai_component,
-                 render_component,
-                 starting_position,
-                 patrol_radius=25
-                 ):
+    def __init__(self, type_object, ai_component, render_component, starting_position):
         super().__init__()
-
         self.health = 100
-
-        # Boundaries for patrol
-        self.left_bound = starting_position[0] - patrol_radius
-        self.right_bound = starting_position[0] + patrol_radius
-
-        self.input_component = ai_component
+        self.ai_component = ai_component
         self.render_component = render_component
         self.damage_component = EnemyDamageComponent(self)
         self.gravity_component = EntityGravityComponent()
@@ -129,7 +116,7 @@ class Enemy(Entity):
         pass
     
     def update(self, delta_time, map, player):
-        self.input_component.update(self, map)
+        self.ai_component.update(self, map)
         self.gravity_component.update(self, delta_time)
         self.rigid_body_component.update(self, delta_time, map)
         self.damage_component.update(player, map)
