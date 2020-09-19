@@ -40,37 +40,39 @@ class SoundComponent(Component):
         self.sounds = sounds
 
     def receive(self, message):
-        if message is EntityMessage.JUMP:
+        if message is EntityMessage.PLAY_JUMP_SOUND:
             self.sounds["JUMP"].play()
-        elif message is EntityMessage.HIT:
+        elif message is EntityMessage.PLAY_DAMAGE_SOUND:
             self.sounds["HIT"].play()
 
 
 class DamageComponent(Component):
 
-    def __init__(self, entity, immunity_time=500, enemy_damage=20):
+    def __init__(self, entity, immunity_time=500, enemy_damage=20, spike_damage=20):
         super().__init__()
         self.entity = entity
         self.last_collide_time = 0
         self.IMMUNITY_TIME = immunity_time
         self.ENEMY_DAMAGE = enemy_damage
+        self.SPIKE_DAMAGE = spike_damage
 
     def is_immune(self):
         return self.last_collide_time > pg.time.get_ticks() - self.IMMUNITY_TIME
 
-    def inflict_damage(self):
-        self.entity.health -= self.ENEMY_DAMAGE
+    def inflict_damage(self, damage):
+        self.entity.health -= damage
         self.last_collide_time = pg.time.get_ticks()
-        self.entity.message(EntityMessage.HIT)
-        self.entity.y_velocity = -2
+        self.entity.message(EntityMessage.PLAY_DAMAGE_SOUND)
         if self.entity.health <= 0:
             self.entity.set_state(EntityState.DEAD)
             pg.event.post(pg.event.Event(GameEvent.GAME_OVER.value))
 
     def receive(self, message):
-        if message is EntityMessage.HIT:
-            if not self.is_immune():
-                self.inflict_damage()
+        if not self.is_immune():
+            if message is EntityMessage.TAKE_ENEMY_DAMAGE:
+                self.inflict_damage(self.ENEMY_DAMAGE)
+            if message is EntityMessage.TAKE_SPIKE_DAMAGE:
+                self.inflict_damage(self.SPIKE_DAMAGE)
 
 
 class EnemyDamageComponent(Component):
@@ -92,7 +94,7 @@ class EnemyDamageComponent(Component):
             if is_stomped_by_player:
                 self.enemy.take_damage(100)
             else:
-                player.take_damage(20)
+                player.message(EntityMessage.TAKE_ENEMY_DAMAGE)
 
     def take_damage_if_crushed_by_terrain(self, map):
         colliding_sprites = pg.sprite.spritecollide(

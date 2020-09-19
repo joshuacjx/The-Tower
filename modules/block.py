@@ -1,6 +1,6 @@
 import pygame as pg
 from .animation import Animation, TerrainAnimationComponent
-from .entitystate import GameEvent, EntityState, Direction
+from .entitystate import GameEvent, EntityState, Direction, EntityMessage
 from .spritesheet import SpriteSheet
 from .textureset import TerrainType
 
@@ -30,22 +30,25 @@ class Block(pg.sprite.Sprite):
 
 
 class SpikeBlock(Block):
-    """Represents a block that damages the player if the player comes into contact with it"""
+    """Represents a block that damages the player
+    if the player comes into contact with it"""
 
     def __init__(self, type_object, x, y):
         super().__init__(type_object, x, y)
         self.is_spike = True
 
-    def update(self, entity, *args):
-        """Checks for collision between the player and the Hazardous Block, and damages the player upon colliding"""
+    def update(self, player, *args):
+        """Checks for collision between the player and the
+        Hazardous Block, and damages the player upon colliding"""
 
-        if self.rect.colliderect(entity.rect):
+        if self.rect.colliderect(player.rect):
             # Since spikes are always at the bottom, the player must always come from the top
-            entity.rect.bottom = self.rect.top
+            player.rect.bottom = self.rect.top
 
-        if (self.rect.left < entity.rect.left < self.rect.right or self.rect.left < entity.rect.right < self.rect.right) \
-                and self.rect.top == entity.rect.bottom:
-            entity.take_damage(20)
+        if (self.rect.left < player.rect.left < self.rect.right
+            or self.rect.left < player.rect.right < self.rect.right) \
+                and self.rect.top == player.rect.bottom:
+            player.message(EntityMessage.TAKE_SPIKE_DAMAGE)
 
 
 

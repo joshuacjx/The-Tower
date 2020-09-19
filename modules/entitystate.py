@@ -36,8 +36,14 @@ class Action(Enum):
 
 
 class EntityMessage(Enum):
-    JUMP = 0
-    HIT = 1
+    """Components of Entities communicate with one another via message-passing.
+    The entity receiving the message would carry out the action in the message
+    if it has a Component that is able to carry it out."""
+
+    PLAY_JUMP_SOUND = 0
+    PLAY_DAMAGE_SOUND = 1
+    TAKE_ENEMY_DAMAGE = 2
+    TAKE_SPIKE_DAMAGE = 3
 
 
 class GameEvent(Enum):

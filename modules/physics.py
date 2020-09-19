@@ -51,7 +51,7 @@ class UserControlComponent(Component):
         if is_pressed[pg.K_SPACE]:
             self.entity.set_state(EntityState.JUMPING)
             self.entity.set_y_velocity(self.JUMP_VELOCITY)
-            self.entity.message(EntityMessage.JUMP)
+            self.entity.message(EntityMessage.PLAY_JUMP_SOUND)
 
     def handle_walking_entity(self, is_pressed: dict):
         if is_pressed[pg.K_LEFT]:
@@ -66,7 +66,7 @@ class UserControlComponent(Component):
         if is_pressed[pg.K_SPACE]:
             self.entity.set_state(EntityState.JUMPING)
             self.entity.set_y_velocity(self.JUMP_VELOCITY)
-            self.entity.message(EntityMessage.JUMP)
+            self.entity.message(EntityMessage.PLAY_JUMP_SOUND)
 
     def handle_jumping_entity(self, is_pressed: dict):
         if is_pressed[pg.K_LEFT]:
@@ -90,7 +90,7 @@ class UserControlComponent(Component):
         if is_pressed[pg.K_SPACE]:
             self.entity.set_state(EntityState.JUMPING)
             self.entity.set_y_velocity(self.JUMP_VELOCITY)
-            self.entity.message(EntityMessage.JUMP)
+            self.entity.message(EntityMessage.PLAY_JUMP_SOUND)
 
     def handle_climbing_entity(self, is_pressed: dict):
         if is_pressed[pg.K_UP]:

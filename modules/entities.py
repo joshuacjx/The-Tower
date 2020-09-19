@@ -19,7 +19,7 @@ class Entity(pg.sprite.Sprite):
     def update(self, *args):
         raise NotImplementedError
 
-    def receive(self, message):
+    def message(self, message):
         raise NotImplementedError
 
     def set_x_velocity(self, new_x_velocity):
@@ -62,30 +62,7 @@ class Player(Entity):
         self.damage_component = DamageComponent(self)
         self.gravity_component = EntityGravityComponent()
         self.rigid_body_component = EntityRigidBodyComponent()
-
         self.image = self.animation_component.get_initial_image()
-        self.last_collide_time = 0
-
-    def take_damage(self, damage):
-        """Decreases the health of the player by the specified amount"""
-        if self.is_immune():
-            return
-        else:
-            self.health -= damage
-            self.last_collide_time = pg.time.get_ticks()
-            self.message("HIT")
-            self.y_velocity = -2
-
-        if self.health <= 0:
-            self.state = EntityState.DEAD
-            pg.event.post(
-                pg.event.Event(
-                    GameEvent.GAME_OVER.value
-                )
-            )
-
-    def is_immune(self):
-        return self.last_collide_time > pg.time.get_ticks() - 500
 
     def message(self, message: EntityMessage):
         self.sound_component.receive(message)
