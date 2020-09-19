@@ -345,15 +345,10 @@ class GameScene(Scene):
                 if not self.can_submit_leaderboard:
                     self.manager.scene.submitted = True
 
-        # Processes the input for the player
-        self.player.handle_input()
-
     def update(self, delta_time):
         self.player.update(delta_time, self.level_manager.level.map)
         self.level_manager.level.update(delta_time, self.player)
         self.hud.update(delta_time, self.player, self.camera)
-
-        # Move camera to player's position
         self.camera.follow_target(self.player)
 
     def render(self, surface):
@@ -361,13 +356,8 @@ class GameScene(Scene):
         for background in self.backgrounds:
             background.render()
 
-        # Draws the map and enemies
         self.level_manager.level.render(self.camera, self.game_display)
-
-        # Draw player on game_display wrt camera position
         self.player.render(self.camera, self.game_display)
-
-        # Draw GUI
         self.hud.render(self.game_display)
 
         # Blit game_display on window surface

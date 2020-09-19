@@ -1,9 +1,13 @@
 import pygame as pg
-from modules.component import Component
-from modules.entitystate import EntityState, Direction
+from .component import Component
+from .entitystate import EntityState, Direction, EntityMessage
 
 
 class UserControlComponent(Component):
+    # TODO: Implement an EntityStateManager which handles the state changes.
+    #  UserControlComponent and AIControlComponent should only handle the velocities.
+    #  RigidBodyComponent should only handly collisions and should not be concerned with state.
+
     """Handles user input which modifies the state,
     velocity and direction of the Entity sprite."""
 
@@ -47,7 +51,7 @@ class UserControlComponent(Component):
         if is_pressed[pg.K_SPACE]:
             self.entity.set_state(EntityState.JUMPING)
             self.entity.set_y_velocity(self.JUMP_VELOCITY)
-            self.entity.message("JUMP")
+            self.entity.message(EntityMessage.JUMP)
 
     def handle_walking_entity(self, is_pressed: dict):
         if is_pressed[pg.K_LEFT]:
@@ -62,7 +66,7 @@ class UserControlComponent(Component):
         if is_pressed[pg.K_SPACE]:
             self.entity.set_state(EntityState.JUMPING)
             self.entity.set_y_velocity(self.JUMP_VELOCITY)
-            self.entity.message("JUMP")
+            self.entity.message(EntityMessage.JUMP)
 
     def handle_jumping_entity(self, is_pressed: dict):
         if is_pressed[pg.K_LEFT]:
@@ -86,7 +90,7 @@ class UserControlComponent(Component):
         if is_pressed[pg.K_SPACE]:
             self.entity.set_state(EntityState.JUMPING)
             self.entity.set_y_velocity(self.JUMP_VELOCITY)
-            self.entity.message("JUMP")
+            self.entity.message(EntityMessage.JUMP)
 
     def handle_climbing_entity(self, is_pressed: dict):
         if is_pressed[pg.K_UP]:

@@ -35,6 +35,11 @@ class Action(Enum):
     LAND = 3
 
 
+class EntityMessage(Enum):
+    JUMP = 0
+    HIT = 1
+
+
 class GameEvent(Enum):
     SWITCH_LEVEL = pg.USEREVENT + 0
     GAME_OVER = pg.USEREVENT + 1

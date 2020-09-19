@@ -1,7 +1,7 @@
 import pygame as pg
-from .entitystate import GameEvent, EntityState, Direction
+from .entitystate import GameEvent, EntityState, Direction, EntityMessage
 from .animation import EntityAnimationComponent
-from .component import SoundComponent, RenderComponent, EnemyDamageComponent
+from .component import SoundComponent, RenderComponent, EnemyDamageComponent, DamageComponent
 from .physics import UserControlComponent, EntityGravityComponent, EntityRigidBodyComponent, EnemyRigidBodyComponent
 from .libraries import Library
 
@@ -59,6 +59,7 @@ class Player(Entity):
         self.animation_component = EntityAnimationComponent(self, Library.player_animations)
         self.sound_component = SoundComponent(Library.entity_sounds)
         self.render_component = RenderComponent()
+        self.damage_component = DamageComponent(self)
         self.gravity_component = EntityGravityComponent()
         self.rigid_body_component = EntityRigidBodyComponent()
 
@@ -67,7 +68,6 @@ class Player(Entity):
 
     def take_damage(self, damage):
         """Decreases the health of the player by the specified amount"""
-        # TODO: Abstract the damage logic into a component
         if self.is_immune():
             return
         else:
@@ -87,11 +87,9 @@ class Player(Entity):
     def is_immune(self):
         return self.last_collide_time > pg.time.get_ticks() - 500
 
-    def message(self, message):
+    def message(self, message: EntityMessage):
         self.sound_component.receive(message)
-
-    def handle_input(self):
-        self.input_component.update()
+        self.damage_component.receive(message)
 
     def update(self, delta_time, map):
         if self.rect.top > map.rect.bottom:
@@ -102,6 +100,7 @@ class Player(Entity):
                 )
             )
         else:
+            self.input_component.update()
             self.animation_component.update()
             self.gravity_component.update(self, delta_time)
             self.rigid_body_component.update(self, delta_time, map)
