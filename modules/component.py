@@ -58,8 +58,9 @@ class DeathComponent(Component):
         pg.event.post(pg.event.Event(GameEvent.GAME_OVER.value))
 
     def update(self, map):
+        has_no_more_health = self.entity.health <= 0
         has_fallen_out_of_map = self.entity.rect.top > map.rect.bottom
-        if has_fallen_out_of_map:
+        if has_fallen_out_of_map or has_no_more_health:
             self.die()
 
     def receive(self, message):
@@ -92,9 +93,6 @@ class DamageComponent(Component):
         self.entity.health -= damage
         self.last_collide_time = pg.time.get_ticks()
         self.entity.message(EntityMessage.PLAY_DAMAGE_SOUND)
-        if self.entity.health <= 0:
-            self.entity.set_state(EntityState.DEAD)
-            pg.event.post(pg.event.Event(GameEvent.GAME_OVER.value))
 
 
 class EnemyDamageComponent(Component):

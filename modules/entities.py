@@ -1,5 +1,5 @@
 import pygame as pg
-from .entitystate import GameEvent, EntityState, Direction, EntityMessage
+from .entitystate import EntityState, Direction, EntityMessage
 from .animation import EntityAnimationComponent
 from .component import SoundComponent, RenderComponent, EnemyDamageComponent, DamageComponent, DeathComponent
 from .physics import UserControlComponent, EntityGravityComponent, EntityRigidBodyComponent, EnemyRigidBodyComponent
@@ -17,6 +17,7 @@ class Entity(pg.sprite.Sprite):
         self.y_velocity = 0
         self.direction = Direction.RIGHT
         self.state = EntityState.IDLE
+        self.image = None
 
     def update(self, *args):
         raise NotImplementedError
@@ -63,7 +64,6 @@ class Player(Entity):
         self.gravity_component = EntityGravityComponent()
         self.rigid_body_component = EntityRigidBodyComponent()
         self.death_component = DeathComponent(self)
-        self.image = self.animation_component.get_initial_image()
 
     def message(self, message: EntityMessage):
         self.sound_component.receive(message)
@@ -97,7 +97,6 @@ class Enemy(Entity):
         self.rect.x = starting_position[0]
         self.rect.y = starting_position[1]
         self.blit_rect = type_object.blit_rect
-        self.image = self.animation_component.get_initial_image()
 
     def take_damage(self, damage):
         """Instantly kills the enemy"""
