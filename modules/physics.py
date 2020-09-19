@@ -18,7 +18,7 @@ class UserControlComponent(Component):
         self.ZERO_VELOCITY = 0
         self.WALK_LEFT_VELOCITY = -180
         self.WALK_RIGHT_VELOCITY = 180
-        self.JUMP_VELOCITY = -750
+        self.JUMP_VELOCITY = -500
         self.CLIMB_UP_VELOCITY = -120
         self.CLIMB_DOWN_VELOCITY = 180
 
@@ -128,7 +128,7 @@ class AIControlComponent(Component):
 class EntityGravityComponent(Component):
     """Enables the entity to respond to the force of gravity."""
 
-    def __init__(self, weight=56):
+    def __init__(self, weight=30):
         super().__init__()
         self.GRAVITY = weight
         self.DISCRETE_TIMESTEP = 1 / 60

@@ -44,6 +44,7 @@ class EntityMessage(Enum):
     PLAY_DAMAGE_SOUND = 1
     TAKE_ENEMY_DAMAGE = 2
     TAKE_SPIKE_DAMAGE = 3
+    DIE = 4
 
 
 class GameEvent(Enum):

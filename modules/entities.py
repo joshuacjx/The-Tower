@@ -1,15 +1,18 @@
 import pygame as pg
 from .entitystate import GameEvent, EntityState, Direction, EntityMessage
 from .animation import EntityAnimationComponent
-from .component import SoundComponent, RenderComponent, EnemyDamageComponent, DamageComponent
+from .component import SoundComponent, RenderComponent, EnemyDamageComponent, DamageComponent, DeathComponent
 from .physics import UserControlComponent, EntityGravityComponent, EntityRigidBodyComponent, EnemyRigidBodyComponent
 from .libraries import Library
 
 
 class Entity(pg.sprite.Sprite):
+    # TODO: Ideally, a player or enemy should purely be an
+    #  Entity which has a unique set of Components.
 
     def __init__(self):
         super().__init__()
+        self.health = 100
         self.x_velocity = 0              
         self.y_velocity = 0
         self.direction = Direction.RIGHT
@@ -50,10 +53,8 @@ class Player(Entity):
 
     def __init__(self):
         super().__init__()
-        self.health = 100
         self.rect = pg.Rect(10, 10, 20, 30)
         self.blit_rect = pg.Rect(15, 3.5, 20, 30)
-
         self.input_component = UserControlComponent(self)
         self.animation_component = EntityAnimationComponent(self, Library.player_animations)
         self.sound_component = SoundComponent(Library.entity_sounds)
@@ -61,25 +62,20 @@ class Player(Entity):
         self.damage_component = DamageComponent(self)
         self.gravity_component = EntityGravityComponent()
         self.rigid_body_component = EntityRigidBodyComponent()
+        self.death_component = DeathComponent(self)
         self.image = self.animation_component.get_initial_image()
 
     def message(self, message: EntityMessage):
         self.sound_component.receive(message)
         self.damage_component.receive(message)
+        self.death_component.receive(message)
 
     def update(self, delta_time, map):
-        if self.rect.top > map.rect.bottom:
-            self.state = EntityState.DEAD
-            pg.event.post(
-                pg.event.Event(
-                    GameEvent.GAME_OVER.value
-                )
-            )
-        else:
-            self.input_component.update()
-            self.animation_component.update()
-            self.gravity_component.update(self, delta_time)
-            self.rigid_body_component.update(self, delta_time, map)
+        self.input_component.update()
+        self.animation_component.update()
+        self.gravity_component.update(self, delta_time)
+        self.rigid_body_component.update(self, delta_time, map)
+        self.death_component.update(map)
 
     def render(self, camera, surface):
         self.render_component.update(self, camera, surface)
@@ -89,7 +85,6 @@ class Enemy(Entity):
 
     def __init__(self, type_object, ai_component, render_component, starting_position):
         super().__init__()
-        self.health = 100
         self.ai_component = ai_component
         self.render_component = render_component
         self.damage_component = EnemyDamageComponent(self)
@@ -98,13 +93,10 @@ class Enemy(Entity):
         self.animation_component = EntityAnimationComponent(self, type_object.animation_library)
         self.sound_component = SoundComponent(type_object.sound_library)
 
-        # Define starting position
-        # index 0 is x position, index 1 is y position, index 2 is patrol range
         self.rect = type_object.rect
         self.rect.x = starting_position[0]
         self.rect.y = starting_position[1]
         self.blit_rect = type_object.blit_rect
-
         self.image = self.animation_component.get_initial_image()
 
     def take_damage(self, damage):

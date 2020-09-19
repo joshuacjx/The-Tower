@@ -46,7 +46,29 @@ class SoundComponent(Component):
             self.sounds["HIT"].play()
 
 
+class DeathComponent(Component):
+    """Handles the situations in which an entity dies."""
+
+    def __init__(self, entity):
+        super().__init__()
+        self.entity = entity
+
+    def die(self):
+        self.entity.set_state(EntityState.DEAD)
+        pg.event.post(pg.event.Event(GameEvent.GAME_OVER.value))
+
+    def update(self, map):
+        has_fallen_out_of_map = self.entity.rect.top > map.rect.bottom
+        if has_fallen_out_of_map:
+            self.die()
+
+    def receive(self, message):
+        if message is EntityMessage.DIE:
+            self.die()
+
+
 class DamageComponent(Component):
+    """Handles the situations in which a player would take damage in health."""
 
     def __init__(self, entity, immunity_time=500, enemy_damage=20, spike_damage=20):
         super().__init__()
@@ -55,6 +77,13 @@ class DamageComponent(Component):
         self.IMMUNITY_TIME = immunity_time
         self.ENEMY_DAMAGE = enemy_damage
         self.SPIKE_DAMAGE = spike_damage
+
+    def receive(self, message):
+        if not self.is_immune():
+            if message is EntityMessage.TAKE_ENEMY_DAMAGE:
+                self.inflict_damage(self.ENEMY_DAMAGE)
+            if message is EntityMessage.TAKE_SPIKE_DAMAGE:
+                self.inflict_damage(self.SPIKE_DAMAGE)
 
     def is_immune(self):
         return self.last_collide_time > pg.time.get_ticks() - self.IMMUNITY_TIME
@@ -66,13 +95,6 @@ class DamageComponent(Component):
         if self.entity.health <= 0:
             self.entity.set_state(EntityState.DEAD)
             pg.event.post(pg.event.Event(GameEvent.GAME_OVER.value))
-
-    def receive(self, message):
-        if not self.is_immune():
-            if message is EntityMessage.TAKE_ENEMY_DAMAGE:
-                self.inflict_damage(self.ENEMY_DAMAGE)
-            if message is EntityMessage.TAKE_SPIKE_DAMAGE:
-                self.inflict_damage(self.SPIKE_DAMAGE)
 
 
 class EnemyDamageComponent(Component):
