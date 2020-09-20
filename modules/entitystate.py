@@ -45,6 +45,8 @@ class EntityMessage(Enum):
     TAKE_ENEMY_DAMAGE = 2
     TAKE_SPIKE_DAMAGE = 3
     DIE = 4
+    AI_TURN_RIGHT = 5
+    AI_TURN_LEFT = 6
 
 
 class GameEvent(Enum):

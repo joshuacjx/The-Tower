@@ -26,7 +26,7 @@ class RenderComponent(Component):
         super().__init__()
 
     def update(self, entity, camera, game_display: Surface):
-        # TODO: Abstract away all the blit_rect logic
+        # rendered_image = entity.image
         rendered_image = entity.image.subsurface(entity.blit_rect)
         blit_destination = (entity.rect.x - camera.rect.x, entity.rect.y - camera.rect.y)
         game_display.blit(rendered_image, blit_destination)
@@ -48,13 +48,15 @@ class SoundComponent(Component):
 class DeathComponent(Component):
     """Handles the situations in which an entity dies."""
 
-    def __init__(self, entity):
+    def __init__(self, entity, is_game_over=True):
         super().__init__()
         self.entity = entity
+        self.is_game_over = is_game_over
 
     def die(self):
         self.entity.set_state(EntityState.DEAD)
-        pg.event.post(pg.event.Event(GameEvent.GAME_OVER.value))
+        if self.is_game_over:
+            pg.event.post(pg.event.Event(GameEvent.GAME_OVER.value))
 
     def update(self, map):
         has_no_more_health = self.entity.health <= 0
@@ -92,35 +94,3 @@ class DamageComponent(Component):
         self.entity.health -= damage
         self.last_collide_time = pg.time.get_ticks()
         self.entity.message(EntityMessage.PLAY_DAMAGE_SOUND)
-
-
-class EnemyDamageComponent(Component):
-    """Handles the situations in which the enemy would take damage in health."""
-
-    def __init__(self, enemy):
-        super().__init__()
-        self.enemy = enemy
-
-    def update(self, player, map):
-        self.take_damage_if_stomped_by_player(player)
-        self.take_damage_if_crushed_by_terrain(map)
-
-    def take_damage_if_stomped_by_player(self, player):
-        has_collided_with_player = self.enemy.rect.colliderect(player.rect)
-        if has_collided_with_player:
-            is_stomped_by_player = player.rect.bottom < self.enemy.rect.centery \
-                                   and player.y_velocity > 0
-            if is_stomped_by_player:
-                self.enemy.take_damage(100)
-            else:
-                player.message(EntityMessage.TAKE_ENEMY_DAMAGE)
-
-    def take_damage_if_crushed_by_terrain(self, map):
-        colliding_sprites = pg.sprite.spritecollide(
-            self.enemy, map.collideable_terrain_group, False)
-        for colliding_sprite in colliding_sprites:
-            is_crushed_by_terrain = \
-                colliding_sprite.rect.bottom \
-                < self.enemy.rect.centery
-            if is_crushed_by_terrain:
-                self.enemy.take_damage(100)

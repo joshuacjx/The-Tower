@@ -1,8 +1,8 @@
 import pygame as pg
 from .entitystate import EntityState, Direction, EntityMessage
 from .animation import EntityAnimationComponent
-from .component import SoundComponent, RenderComponent, EnemyDamageComponent, DamageComponent, DeathComponent
-from .physics import UserControlComponent, EntityGravityComponent, EntityRigidBodyComponent, EnemyRigidBodyComponent
+from .component import SoundComponent, RenderComponent, DamageComponent, DeathComponent
+from .physics import UserControlComponent, EntityGravityComponent, EntityRigidBodyComponent
 from .libraries import Library
 
 
@@ -74,7 +74,7 @@ class Player(Entity):
         self.input_component.update()
         self.animation_component.update()
         self.gravity_component.update(self, delta_time)
-        self.rigid_body_component.update(self, delta_time, map)
+        self.rigid_body_component.update(self, delta_time, map, self)
         self.death_component.update(map)
 
     def render(self, camera, surface):
@@ -87,31 +87,28 @@ class Enemy(Entity):
         super().__init__()
         self.ai_component = ai_component
         self.render_component = render_component
-        self.damage_component = EnemyDamageComponent(self)
         self.gravity_component = EntityGravityComponent()
-        self.rigid_body_component = EnemyRigidBodyComponent()
+        self.rigid_body_component = EntityRigidBodyComponent()
         self.animation_component = EntityAnimationComponent(self, type_object.animation_library)
         self.sound_component = SoundComponent(type_object.sound_library)
+        self.death_component = DeathComponent(self, is_game_over=False)
 
         self.rect = type_object.rect
         self.rect.x = starting_position[0]
         self.rect.y = starting_position[1]
         self.blit_rect = type_object.blit_rect
-
-    def take_damage(self, damage):
-        """Instantly kills the enemy"""
-        # TODO: Properly handle animations for dying
-        self.state = EntityState.DEAD
+        self.image = self.animation_component.get_initial_image()
 
     def message(self, message):
-        pass
+        self.ai_component.receive(message, self)
+        self.death_component.receive(message)
     
     def update(self, delta_time, map, player):
         self.ai_component.update(self, map)
         self.gravity_component.update(self, delta_time)
-        self.rigid_body_component.update(self, delta_time, map)
-        self.damage_component.update(player, map)
+        self.rigid_body_component.update(self, delta_time, map, player)
         self.animation_component.update()
+        self.death_component.update(map)
 
     def render(self, camera, surface):
         self.render_component.update(self, camera, surface)

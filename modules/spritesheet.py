@@ -46,6 +46,7 @@ class SpriteSheet:
             image = self.get_image_at(i)
             if flip:
                 image = pg.transform.flip(image, True, False)
+            # image = image.subsurface(image.get_bounding_rect())
             images.append(image)
         return images
 

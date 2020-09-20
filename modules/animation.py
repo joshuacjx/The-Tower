@@ -66,6 +66,9 @@ class EntityAnimationComponent(Component):
         self.current_state = entity.get_state()
         self.current_animation = self.animations[self.current_state]
 
+    def get_initial_image(self):
+        return self.current_animation.get_next_image()
+
     def update(self):
         """Switches to a new Animation if the Entity has changed its state."""
 

@@ -124,6 +124,14 @@ class AIControlComponent(Component):
             else:
                 enemy.reverse_direction()
 
+    def receive(self, message, enemy):
+        if message is EntityMessage.AI_TURN_RIGHT:
+            enemy.set_direction(Direction.RIGHT)
+            enemy.reverse_x_velocity()
+        if message is EntityMessage.AI_TURN_LEFT:
+            enemy.set_direction(Direction.LEFT)
+            enemy.reverse_x_velocity()
+
 
 class EntityGravityComponent(Component):
     """Enables the entity to respond to the force of gravity."""
@@ -153,24 +161,31 @@ class EntityRigidBodyComponent(Component):
         super().__init__()
         self.DISCRETE_TIMESTEP = 1 / 60
 
-    def update(self, entity, delta_time, game_map):
+    def update(self, entity, delta_time, game_map, player):
         num_full_steps = int(delta_time / self.DISCRETE_TIMESTEP)
         remainder_time = delta_time % self.DISCRETE_TIMESTEP
         for i in range(0, num_full_steps):
             entity.rect.y += int(entity.y_velocity * self.DISCRETE_TIMESTEP)
-            self.handle_y_collisions(entity, game_map)
+            self.handle_y_collisions(entity, game_map, player)
             entity.rect.x += int(entity.x_velocity * self.DISCRETE_TIMESTEP)
             self.handle_x_collisions(entity, game_map)
         entity.rect.y += int(entity.y_velocity * remainder_time)
         if int(entity.y_velocity * remainder_time) != 0:
-            self.handle_y_collisions(entity, game_map)
+            self.handle_y_collisions(entity, game_map, player)
         entity.rect.x += int(entity.x_velocity * remainder_time)
         self.handle_x_collisions(entity, game_map)
         self.handle_map_boundary_collisions(entity, game_map)
 
     @staticmethod
-    def handle_y_collisions(entity, map):
+    def handle_y_collisions(entity, map, player):
         """Handles collisions between entity and the terrain along the y-axis."""
+        has_collided_with_player = entity is not player and entity.rect.colliderect(player.rect)
+        if has_collided_with_player:
+            is_stomped_by_player = player.rect.bottom < entity.rect.centery and player.y_velocity > 0
+            if is_stomped_by_player:
+                entity.message(EntityMessage.DIE)
+            else:
+                player.message(EntityMessage.TAKE_ENEMY_DAMAGE)
         colliding_sprites = pg.sprite.spritecollide(
             entity, map.collideable_terrain_group, False)
         for colliding_sprite in colliding_sprites:
@@ -178,28 +193,32 @@ class EntityRigidBodyComponent(Component):
                 entity.rect.top = colliding_sprite.rect.bottom
                 entity.set_y_velocity(0)
             if is_colliding_from_above(entity, colliding_sprite):
-                if entity.get_state() is EntityState.JUMPING:
-                    entity.set_state(EntityState.IDLE)
-                entity.rect.bottom = colliding_sprite.rect.top
-                entity.set_y_velocity(0)
+                is_crushed = colliding_sprite.rect.bottom < entity.rect.centery
+                if is_crushed:
+                    entity.message(EntityMessage.DIE)
+                else:
+                    if entity.get_state() is EntityState.JUMPING:
+                        entity.set_state(EntityState.IDLE)
+                    entity.rect.bottom = colliding_sprite.rect.top
+                    entity.set_y_velocity(0)
 
     @staticmethod
     def handle_x_collisions(entity, map):
-        """Handles collisions between entity and the terrain
-        along the x-axis."""
+        """Handles collisions between entity and the terrain along the x-axis."""
         colliding_sprites = pg.sprite.spritecollide(
             entity, map.collideable_terrain_group, False)
         for colliding_sprite in colliding_sprites:
             if not colliding_sprite.is_spike:
                 if is_colliding_from_right(entity, colliding_sprite):
                     entity.rect.left = colliding_sprite.rect.right
+                    entity.message(EntityMessage.AI_TURN_RIGHT)
                 if is_colliding_from_left(entity, colliding_sprite):
                     entity.rect.right = colliding_sprite.rect.left
+                    entity.message(EntityMessage.AI_TURN_LEFT)
 
     @staticmethod
     def handle_map_boundary_collisions(entity, map):
-        """Handles collisions between entity
-        and the boundaries of the map."""
+        """Handles collisions between entity and the boundaries of the map."""
         map_width = map.rect.width
         if entity.rect.top < 0:
             entity.rect.top = 0
@@ -207,25 +226,6 @@ class EntityRigidBodyComponent(Component):
             entity.rect.left = 0
         elif entity.rect.right > map_width:
             entity.rect.right = map_width
-
-
-class EnemyRigidBodyComponent(EntityRigidBodyComponent):
-    def __init__(self):
-        super().__init__()
-
-    @staticmethod
-    def handle_x_collisions(enemy, map):
-        colliding_sprites = pg.sprite.spritecollide(
-            enemy, map.collideable_terrain_group, False)
-        for colliding_sprite in colliding_sprites:
-            if is_colliding_from_right(enemy, colliding_sprite):
-                enemy.rect.left = colliding_sprite.rect.right
-                enemy.set_direction(Direction.RIGHT)
-                enemy.reverse_x_velocity()
-            if is_colliding_from_left(enemy, colliding_sprite):
-                enemy.rect.right = colliding_sprite.rect.left
-                enemy.set_direction(Direction.LEFT)
-                enemy.reverse_x_velocity()
 
 
 def is_colliding_from_below(entity, colliding_sprite):
