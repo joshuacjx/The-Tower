@@ -7,8 +7,7 @@ from .libraries import Library
 
 
 class Entity(pg.sprite.Sprite):
-    # TODO: Ideally, a player or enemy should purely be an
-    #  Entity which has a unique set of Components.
+    # TODO: Make a EntityPhysics and EntityStateManager object
 
     def __init__(self):
         super().__init__()

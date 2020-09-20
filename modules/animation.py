@@ -1,3 +1,4 @@
+import os
 import pygame as pg
 from pygame.surface import Surface
 from .component import Component
@@ -21,6 +22,18 @@ class Animation:
     @staticmethod
     def of_selected_images(sprite_sheet, start, end, flip=False, speed=5):
         images = sprite_sheet.get_image_subsequence(start, end, flip)
+        return Animation(images, speed)
+
+    @staticmethod
+    def of_directory(directory_path, speed=5):
+        REQUIRED_SUFFIX = ".png"
+        images = []
+        filenames = os.listdir(directory_path)
+        filenames.sort()
+        for filename in filenames:
+            image_path = os.path.join(directory_path, filename)
+            if image_path.endswith(REQUIRED_SUFFIX):
+                images.append(pg.image.load(image_path))
         return Animation(images, speed)
 
     def get_image_at(self, index):
@@ -82,5 +95,3 @@ class EntityAnimationComponent(Component):
         if self.entity.get_direction() is Direction.LEFT:
             next_image = pg.transform.flip(next_image, True, False)
         self.entity.image = next_image
-
-

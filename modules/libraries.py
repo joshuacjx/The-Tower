@@ -15,9 +15,9 @@ class Library:
     }
 
     player_animations = {
-        EntityState.IDLE: Animation.of_entire_sheet(adventurer_sprite_sheets["IDLE"]),
-        EntityState.WALKING: Animation.of_entire_sheet(adventurer_sprite_sheets["WALKING"]),
-        EntityState.JUMPING: Animation.of_entire_sheet(adventurer_sprite_sheets["JUMPING"]),
+        EntityState.IDLE: Animation.of_directory("assets/textures/player/individual/idle1"),
+        EntityState.WALKING: Animation.of_directory("assets/textures/player/individual/run"),
+        EntityState.JUMPING: Animation.of_directory("assets/textures/player/individual/jump"),
         EntityState.HANGING: Animation.of_selected_images(adventurer_sprite_sheets["CLIMBING"], 0, 0),
         EntityState.CLIMBING: Animation.of_entire_sheet(adventurer_sprite_sheets["CLIMBING"])
     }
