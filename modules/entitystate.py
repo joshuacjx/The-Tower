@@ -40,14 +40,14 @@ class EntityMessage(Enum):
     The entity receiving the message would carry out the action in the message
     if it has a Component that is able to carry it out."""
 
-    PLAY_JUMP_SOUND = 0
-    PLAY_DAMAGE_SOUND = 1
-    TAKE_ENEMY_DAMAGE = 2
-    TAKE_SPIKE_DAMAGE = 3
+    JUMP = 0
+    RECEIVE_COIN = 1
+    ENEMY_HIT = 2
+    LAND_ON_SPIKE = 3
     DIE = 4
     AI_TURN_RIGHT = 5
     AI_TURN_LEFT = 6
-    GAIN_HEALTH_FROM_COIN = 7
+    DECREMENT_HEALTH = 7
 
 
 class GameEvent(Enum):

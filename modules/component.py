@@ -21,16 +21,15 @@ class Component:
 
 
 class SoundComponent(Component):
-
     def __init__(self, sounds):
         super().__init__()
         self.sounds = sounds
 
     def receive(self, message):
-        if message is EntityMessage.PLAY_JUMP_SOUND:
+        if message is EntityMessage.JUMP:
             self.sounds["JUMP"].play()
-        elif message is EntityMessage.PLAY_DAMAGE_SOUND:
-            self.sounds["HIT"].play()
+        if message is EntityMessage.DECREMENT_HEALTH:
+            self.sounds["DECREMENT_HEALTH"].play()
 
 
 class DeathComponent(Component):
@@ -75,18 +74,18 @@ class HealthComponent(Component):
             self.entity.message(EntityMessage.DIE)
 
     def receive(self, message):
-        if message is EntityMessage.GAIN_HEALTH_FROM_COIN:
+        if message is EntityMessage.RECEIVE_COIN:
             self.take_replenishment(self.COIN_REPLENISHMENT)
-        if message is EntityMessage.TAKE_ENEMY_DAMAGE:
+        if message is EntityMessage.ENEMY_HIT:
             self.take_damage(self.ENEMY_DAMAGE)
-        if message is EntityMessage.TAKE_SPIKE_DAMAGE:
+        if message is EntityMessage.LAND_ON_SPIKE:
             self.take_damage(self.SPIKE_DAMAGE)
 
     def take_damage(self, damage):
         if not self.is_immune():
             self.health -= damage
             self.last_collide_time = pg.time.get_ticks()
-            self.entity.message(EntityMessage.PLAY_DAMAGE_SOUND)
+            self.entity.message(EntityMessage.DECREMENT_HEALTH)
 
     def take_replenishment(self, replenishment):
         if self.health < self.MAX_HEALTH:
@@ -116,7 +115,7 @@ class EnemyCombatComponent(Component):
             if is_stomped_by_player:
                 self.enemy.message(EntityMessage.DIE)
             else:
-                player.message(EntityMessage.TAKE_ENEMY_DAMAGE)
+                player.message(EntityMessage.ENEMY_HIT)
 
 
 class RenderComponent(Component):

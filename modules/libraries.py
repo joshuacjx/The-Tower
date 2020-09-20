@@ -24,7 +24,7 @@ class Library:
 
     entity_sounds = {
         "JUMP": pg.mixer.Sound("assets/sound/sfx/jump.ogg"),
-        "HIT": pg.mixer.Sound("assets/sound/sfx/hitdamage.ogg")
+        "DECREMENT_HEALTH": pg.mixer.Sound("assets/sound/sfx/hitdamage.ogg")
     }
 
     pink_guy_sprite_sheets = {
