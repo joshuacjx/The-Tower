@@ -134,8 +134,7 @@ class Coin(Block):
         """Checks if the player has collided with the coin, healing the player if there is a collision,
         and updates the animation of the coin"""
         if pg.sprite.collide_rect(self, entity):
-            if entity.health < 100:
-                entity.health += 20
+            entity.message(EntityMessage.GAIN_HEALTH_FROM_COIN)
             self.coin_sound.play()
             self.kill()
         self.animation_component.update()

@@ -47,6 +47,7 @@ class EntityMessage(Enum):
     DIE = 4
     AI_TURN_RIGHT = 5
     AI_TURN_LEFT = 6
+    GAIN_HEALTH_FROM_COIN = 7
 
 
 class GameEvent(Enum):

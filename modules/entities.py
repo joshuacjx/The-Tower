@@ -1,7 +1,7 @@
 import pygame as pg
 from .entitystate import EntityState, Direction, EntityMessage
 from .animation import EntityAnimationComponent
-from .component import SoundComponent, RenderComponent, DamageComponent, DeathComponent, EnemyCombatComponent
+from .component import SoundComponent, RenderComponent, HealthComponent, DeathComponent, EnemyCombatComponent
 from .physics import UserControlComponent, EntityGravityComponent, EntityRigidBodyComponent
 from .libraries import Library
 
@@ -12,7 +12,6 @@ class Entity(pg.sprite.Sprite):
 
     def __init__(self):
         super().__init__()
-        self.health = 100
         self.x_velocity = 0              
         self.y_velocity = 0
         self.direction = Direction.RIGHT
@@ -63,14 +62,14 @@ class Player(Entity):
         self.animation_component = EntityAnimationComponent(self, Library.player_animations)
         self.sound_component = SoundComponent(Library.entity_sounds)
         self.render_component = RenderComponent()
-        self.damage_component = DamageComponent(self)
+        self.health_component = HealthComponent(self)
         self.gravity_component = EntityGravityComponent()
         self.rigid_body_component = EntityRigidBodyComponent()
         self.death_component = DeathComponent(self)
 
     def message(self, message: EntityMessage):
         self.sound_component.receive(message)
-        self.damage_component.receive(message)
+        self.health_component.receive(message)
         self.death_component.receive(message)
 
     def update(self, delta_time, map):
@@ -78,6 +77,7 @@ class Player(Entity):
         self.animation_component.update()
         self.gravity_component.update(self, delta_time)
         self.rigid_body_component.update(self, delta_time, map)
+        self.health_component.update()
         self.death_component.update(map)
 
     def render(self, camera, surface):
