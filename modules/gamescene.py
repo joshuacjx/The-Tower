@@ -295,11 +295,9 @@ class GameScene(Scene):
         self.camera = Camera(SURFACE_SIZE, self.level_manager.level.map.rect)
 
         # Initialize player
-        self.player = Player()
+        self.player_starting_position = self.level_manager.level.starting_position
+        self.player = Player(self.player_starting_position)
         self.player_sprite_group = pg.sprite.GroupSingle(self.player)
-
-        self.player.rect.x = self.level_manager.level.starting_position[0]
-        self.player.rect.y = self.level_manager.level.starting_position[1]
 
         # Initialize GUI
         self.hud = HeadsUpDisplay()

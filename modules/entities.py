@@ -52,10 +52,13 @@ class Entity(pg.sprite.Sprite):
 
 class Player(Entity):
 
-    def __init__(self):
+    DEFAULT_STARTING_POS = (10, 10)
+
+    def __init__(self, starting_position=DEFAULT_STARTING_POS):
         super().__init__()
-        self.rect = pg.Rect(10, 10, 20, 30)
         self.blit_rect = pg.Rect(15, 3.5, 20, 30)
+        self.rect = pg.Rect(starting_position, (self.blit_rect.width, self.blit_rect.height))
+
         self.input_component = UserControlComponent(self)
         self.animation_component = EntityAnimationComponent(self, Library.player_animations)
         self.sound_component = SoundComponent(Library.entity_sounds)
@@ -94,10 +97,8 @@ class Enemy(Entity):
         self.death_component = DeathComponent(self, is_game_over=False)
         self.combat_component = EnemyCombatComponent(self)
 
-        self.rect = type_object.rect
-        self.rect.x = starting_position[0]
-        self.rect.y = starting_position[1]
         self.blit_rect = type_object.blit_rect
+        self.rect = pg.Rect(starting_position, (self.blit_rect.width, self.blit_rect.height))
         self.image = self.animation_component.get_initial_image()
 
     def message(self, message):
@@ -130,17 +131,13 @@ class EnemyType:
 class PinkGuy(EnemyType):
     def __init__(self):
         super().__init__()
-        width = 32
-        height = 32
-        self.rect = pg.Rect(0, 0, width, height)
-        self.blit_rect = pg.Rect(0, 0, width, height)
+        self.blit_rect = pg.Rect(0, 0, 32, 32)
         self.animation_library = Library.pink_guy_animations
 
 
 class TrashMonster(EnemyType):
     def __init__(self):
         super().__init__()
-        self.rect = pg.Rect(0, 0, 35, 32)
         self.blit_rect = pg.Rect(4, 0, 35, 32)
         self.animation_library = Library.trash_monster_animations
 
@@ -148,6 +145,5 @@ class TrashMonster(EnemyType):
 class ToothWalker(EnemyType):
     def __init__(self):
         super().__init__()
-        self.rect = pg.Rect(0, 0, 30, 65)
         self.blit_rect = pg.Rect(40, 0, 30, 65)
         self.animation_library = Library.tooth_walker_animations
