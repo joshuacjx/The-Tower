@@ -1,7 +1,7 @@
 import pygame as pg
 from .entitystate import EntityState, Direction, EntityMessage
 from .animation import EntityAnimationComponent
-from .component import SoundComponent, RenderComponent, DamageComponent, DeathComponent
+from .component import SoundComponent, RenderComponent, DamageComponent, DeathComponent, EnemyCombatComponent
 from .physics import UserControlComponent, EntityGravityComponent, EntityRigidBodyComponent
 from .libraries import Library
 
@@ -74,7 +74,7 @@ class Player(Entity):
         self.input_component.update()
         self.animation_component.update()
         self.gravity_component.update(self, delta_time)
-        self.rigid_body_component.update(self, delta_time, map, self)
+        self.rigid_body_component.update(self, delta_time, map)
         self.death_component.update(map)
 
     def render(self, camera, surface):
@@ -92,6 +92,7 @@ class Enemy(Entity):
         self.animation_component = EntityAnimationComponent(self, type_object.animation_library)
         self.sound_component = SoundComponent(type_object.sound_library)
         self.death_component = DeathComponent(self, is_game_over=False)
+        self.combat_component = EnemyCombatComponent(self)
 
         self.rect = type_object.rect
         self.rect.x = starting_position[0]
@@ -106,7 +107,8 @@ class Enemy(Entity):
     def update(self, delta_time, map, player):
         self.ai_component.update(self, map)
         self.gravity_component.update(self, delta_time)
-        self.rigid_body_component.update(self, delta_time, map, player)
+        self.combat_component.update(player)
+        self.rigid_body_component.update(self, delta_time, map)
         self.animation_component.update()
         self.death_component.update(map)
 

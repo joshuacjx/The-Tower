@@ -161,31 +161,24 @@ class EntityRigidBodyComponent(Component):
         super().__init__()
         self.DISCRETE_TIMESTEP = 1 / 60
 
-    def update(self, entity, delta_time, game_map, player):
+    def update(self, entity, delta_time, game_map):
         num_full_steps = int(delta_time / self.DISCRETE_TIMESTEP)
         remainder_time = delta_time % self.DISCRETE_TIMESTEP
         for i in range(0, num_full_steps):
             entity.rect.y += int(entity.y_velocity * self.DISCRETE_TIMESTEP)
-            self.handle_y_collisions(entity, game_map, player)
+            self.handle_y_collisions(entity, game_map)
             entity.rect.x += int(entity.x_velocity * self.DISCRETE_TIMESTEP)
             self.handle_x_collisions(entity, game_map)
         entity.rect.y += int(entity.y_velocity * remainder_time)
         if int(entity.y_velocity * remainder_time) != 0:
-            self.handle_y_collisions(entity, game_map, player)
+            self.handle_y_collisions(entity, game_map)
         entity.rect.x += int(entity.x_velocity * remainder_time)
         self.handle_x_collisions(entity, game_map)
         self.handle_map_boundary_collisions(entity, game_map)
 
     @staticmethod
-    def handle_y_collisions(entity, map, player):
+    def handle_y_collisions(entity, map):
         """Handles collisions between entity and the terrain along the y-axis."""
-        has_collided_with_player = entity is not player and entity.rect.colliderect(player.rect)
-        if has_collided_with_player:
-            is_stomped_by_player = player.rect.bottom < entity.rect.centery and player.y_velocity > 0
-            if is_stomped_by_player:
-                entity.message(EntityMessage.DIE)
-            else:
-                player.message(EntityMessage.TAKE_ENEMY_DAMAGE)
         colliding_sprites = pg.sprite.spritecollide(
             entity, map.collideable_terrain_group, False)
         for colliding_sprite in colliding_sprites:

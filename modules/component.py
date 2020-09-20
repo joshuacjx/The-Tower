@@ -20,18 +20,6 @@ class Component:
         pass
 
 
-class RenderComponent(Component):
-
-    def __init__(self):
-        super().__init__()
-
-    def update(self, entity, camera, game_display: Surface):
-        # rendered_image = entity.image
-        rendered_image = entity.image.subsurface(entity.blit_rect)
-        blit_destination = (entity.rect.x - camera.rect.x, entity.rect.y - camera.rect.y)
-        game_display.blit(rendered_image, blit_destination)
-
-
 class SoundComponent(Component):
 
     def __init__(self, sounds):
@@ -94,3 +82,32 @@ class DamageComponent(Component):
         self.entity.health -= damage
         self.last_collide_time = pg.time.get_ticks()
         self.entity.message(EntityMessage.PLAY_DAMAGE_SOUND)
+
+
+class EnemyCombatComponent(Component):
+    """Handles the interactions between a player and the enemy."""
+
+    def __init__(self, enemy):
+        self.enemy = enemy
+
+    def update(self, player):
+        has_collided_with_player = self.enemy.rect.colliderect(player.rect)
+        if has_collided_with_player:
+            is_stomped_by_player = player.rect.bottom < self.enemy.rect.centery \
+                                   and player.y_velocity > 0
+            if is_stomped_by_player:
+                self.enemy.message(EntityMessage.DIE)
+            else:
+                player.message(EntityMessage.TAKE_ENEMY_DAMAGE)
+
+
+class RenderComponent(Component):
+
+    def __init__(self):
+        super().__init__()
+
+    def update(self, entity, camera, game_display: Surface):
+        # rendered_image = entity.image
+        rendered_image = entity.image.subsurface(entity.blit_rect)
+        blit_destination = (entity.rect.x - camera.rect.x, entity.rect.y - camera.rect.y)
+        game_display.blit(rendered_image, blit_destination)
