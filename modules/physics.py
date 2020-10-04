@@ -3,6 +3,90 @@ from .component import Component
 from .entitystate import EntityState, Direction, EntityMessage
 
 
+class Physics:
+    """A Physics object can be stored as an attribute
+    to Entities and Blocks. They encapsulate all the
+    data related to position, velocity and Direction."""
+
+    def __init__(self, position, dimensions):
+        self.rect = pg.Rect(position, dimensions)
+        self.x_velocity = 0
+        self.y_velocity = 0
+        self.direction = Direction.RIGHT
+
+    # -- Position Accessors -- #
+    def get_x(self):
+        return self.rect.x
+
+    def get_y(self):
+        return self.rect.y
+
+    def get_top(self):
+        return self.rect.top
+
+    def get_bottom(self):
+        return self.rect.bottom
+
+    def get_left(self):
+        return self.rect.left
+
+    def get_right(self):
+        return self.rect.right
+
+    def get_center(self):
+        return self.rect.center
+
+    def set_x(self, x):
+        self.rect.x = x
+
+    def set_y(self, y):
+        self.rect.y = y
+
+    def set_top(self, top):
+        self.rect.top = top
+
+    def set_bottom(self, bottom):
+        self.rect.bottom = bottom
+
+    def set_left(self, left):
+        self.rect.left = left
+
+    def set_right(self, right):
+        self.rect.right = right
+
+    def update_x(self, delta_time):
+        self.rect.x += int(self.x_velocity * delta_time)
+
+    def update_y(self, delta_time):
+        self.rect.y += int(self.y_velocity * delta_time)
+
+    # -- Velocity Accessors -- #
+    def get_x_velocity(self):
+        return self.x_velocity
+
+    def get_y_velocity(self):
+        return self.y_velocity
+
+    def set_x_velocity(self, x_velocity):
+        self.x_velocity = x_velocity
+
+    def set_y_velocity(self, y_velocity):
+        self.y_velocity = y_velocity
+
+    def reverse_x_velocity(self):
+        self.x_velocity = -self.x_velocity
+
+    # -- Direction Accessors -- #
+    def get_direction(self):
+        return self.direction
+
+    def set_direction(self, direction):
+        self.direction = direction
+
+    def reverse_direction(self):
+        self.direction = self.direction.get_reverse()
+
+
 class UserControlComponent(Component):
     # TODO: Implement an EntityStateManager which handles the state changes.
     #  UserControlComponent and AIControlComponent should only handle the velocities.
