@@ -2,7 +2,7 @@ import pygame as pg
 from .entitystate import EntityState, Direction, EntityMessage
 from .animation import EntityAnimationComponent
 from .component import SoundComponent, RenderComponent, HealthComponent, DeathComponent, EnemyCombatComponent
-from .physics import UserControlComponent, EntityGravityComponent, EntityRigidBodyComponent, Physics, AIControlComponent
+from .physics import UserControlComponent, EntityGravityComponent, EntityRigidBodyComponent
 from .libraries import Library
 
 
@@ -55,18 +55,15 @@ class Player(Entity):
     def __init__(self, starting_position=DEFAULT_STARTING_POS):
         super().__init__()
         self.blit_rect = pg.Rect(15, 3.5, 20, 30)
+        self.rect = pg.Rect(starting_position, (self.blit_rect.width, self.blit_rect.height))
 
-        dimensions = (self.blit_rect.width, self.blit_rect.height)
-        self.physics = Physics(starting_position, dimensions)
-        self.rect = self.physics.rect
-
-        self.input_component = UserControlComponent(self, self.physics)
+        self.input_component = UserControlComponent(self)
         self.animation_component = EntityAnimationComponent(self, Library.player_animations)
         self.sound_component = SoundComponent(Library.entity_sounds)
         self.render_component = RenderComponent()
         self.health_component = HealthComponent(self)
-        self.gravity_component = EntityGravityComponent(self.physics)
-        self.rigid_body_component = EntityRigidBodyComponent(self.physics)
+        self.gravity_component = EntityGravityComponent()
+        self.rigid_body_component = EntityRigidBodyComponent()
         self.death_component = DeathComponent(self)
 
     def message(self, message: EntityMessage):
@@ -88,22 +85,19 @@ class Player(Entity):
 
 class Enemy(Entity):
 
-    def __init__(self, type_object, render_component, starting_position):
+    def __init__(self, type_object, ai_component, render_component, starting_position):
         super().__init__()
+        self.ai_component = ai_component
         self.render_component = render_component
+        self.gravity_component = EntityGravityComponent()
+        self.rigid_body_component = EntityRigidBodyComponent()
         self.animation_component = EntityAnimationComponent(self, type_object.animation_library)
         self.sound_component = SoundComponent(type_object.sound_library)
         self.death_component = DeathComponent(self, is_game_over=False)
         self.combat_component = EnemyCombatComponent(self)
 
         self.blit_rect = type_object.blit_rect
-        dimensions = (self.blit_rect.width, self.blit_rect.height)
-        self.physics = Physics(starting_position, dimensions)
-        self.ai_component = AIControlComponent(self.physics, starting_position)
-        self.rect = self.physics.rect
-        self.gravity_component = EntityGravityComponent(self.physics)
-        self.rigid_body_component = EntityRigidBodyComponent(self.physics)
-
+        self.rect = pg.Rect(starting_position, (self.blit_rect.width, self.blit_rect.height))
         self.image = self.animation_component.get_initial_image()
 
     def message(self, message):

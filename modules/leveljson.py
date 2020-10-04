@@ -211,8 +211,10 @@ class EnemyManager:
 
         for enemy_dict in enemies_list:
             self.enemies.add(Enemy(self.enemy_type[enemy_dict["type"]],
+                                   AIControlComponent(enemy_dict["coordinates"]),
                                    self.renderer,
-                                   enemy_dict["coordinates"]))
+                                   enemy_dict["coordinates"])
+                             )
 
     def update(self, delta_time, map, player):
         for entity in self.enemies:

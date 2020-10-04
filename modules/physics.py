@@ -3,29 +3,7 @@ from .component import Component
 from .entitystate import EntityState, Direction, EntityMessage
 
 
-class Physics:
-    """A Physics object can be stored as an attribute to Entities and Blocks.
-    They encapsulate all the data related to position, velocity and Direction."""
-
-    def __init__(self, position, dimensions):
-        self.rect = pg.Rect(position, dimensions)
-        self.x_velocity = 0
-        self.y_velocity = 0
-        self.direction = Direction.RIGHT
-
-
-
-class PhysicsComponent(Component):
-    """A PhysicsComponent differs from other Components because they require a
-    Physics object as one of their attributes. This dependence on solely a Physics
-    object will mean that Components are no longer dependent on Entities themselves."""
-
-    def __init__(self, physics):
-        super().__init__()
-        self.physics = physics
-
-
-class UserControlComponent(PhysicsComponent):
+class UserControlComponent(Component):
     # TODO: Implement an EntityStateManager which handles the state changes.
     #  UserControlComponent and AIControlComponent should only handle the velocities.
     #  RigidBodyComponent should only handly collisions and should not be concerned with state.
@@ -33,8 +11,8 @@ class UserControlComponent(PhysicsComponent):
     """Handles user input which modifies the state,
     velocity and direction of the Entity sprite."""
 
-    def __init__(self, entity, physics):
-        super().__init__(physics)
+    def __init__(self, entity):
+        super().__init__()
         self.entity = entity
         self.ZERO_VELOCITY = 0
         self.WALK_LEFT_VELOCITY = -180
@@ -122,12 +100,12 @@ class UserControlComponent(PhysicsComponent):
             self.entity.set_state(EntityState.HANGING)
 
 
-class AIControlComponent(PhysicsComponent):
+class AIControlComponent(Component):
     """Handles the back and forth movement of
     the Enemy sprites between two points."""
 
-    def __init__(self, physics, starting_position, walking_speed=90, patrol_radius=50):
-        super().__init__(physics)
+    def __init__(self, starting_position, walking_speed=90, patrol_radius=50):
+        super().__init__()
         self.WALKING_SPEED = walking_speed
         self.left_bound = starting_position[0] - patrol_radius
         self.right_bound = starting_position[0] + patrol_radius
@@ -154,11 +132,11 @@ class AIControlComponent(PhysicsComponent):
             enemy.reverse_x_velocity()
 
 
-class EntityGravityComponent(PhysicsComponent):
+class EntityGravityComponent(Component):
     """Enables the entity to respond to the force of gravity."""
 
-    def __init__(self, physics, weight=30):
-        super().__init__(physics)
+    def __init__(self, weight=30):
+        super().__init__()
         self.GRAVITY = weight
         self.DISCRETE_TIMESTEP = 1 / 60
 
@@ -174,12 +152,12 @@ class EntityGravityComponent(PhysicsComponent):
             entity.y_velocity += int(self.GRAVITY * remainder_time * 60)
 
 
-class EntityRigidBodyComponent(PhysicsComponent):
+class EntityRigidBodyComponent(Component):
     """Enables the entity to move based on its velocity
     and respond to collisions with other sprites."""
 
-    def __init__(self, physics):
-        super().__init__(physics)
+    def __init__(self):
+        super().__init__()
         self.DISCRETE_TIMESTEP = 1 / 60
 
     def update(self, entity, delta_time, game_map):
