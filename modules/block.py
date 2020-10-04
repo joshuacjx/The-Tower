@@ -1,7 +1,8 @@
 import pygame as pg
-from .components import SimpleAnimationComponent
-from .entitystate import GameEvent, EntityState, Direction
-from .spritesheet import Spritesheet, TerrainType
+from .animation import Animation, TerrainAnimationComponent
+from .entitystate import GameEvent, EntityState, Direction, EntityMessage
+from .spritesheet import SpriteSheet
+from .textureset import TerrainType
 
 """
 * =============================================================== *
@@ -29,22 +30,25 @@ class Block(pg.sprite.Sprite):
 
 
 class SpikeBlock(Block):
-    """Represents a block that damages the player if the player comes into contact with it"""
+    """Represents a block that damages the player
+    if the player comes into contact with it"""
 
     def __init__(self, type_object, x, y):
         super().__init__(type_object, x, y)
         self.is_spike = True
 
-    def update(self, entity, *args):
-        """Checks for collision between the player and the Hazardous Block, and damages the player upon colliding"""
+    def update(self, player, *args):
+        """Checks for collision between the player and the
+        Hazardous Block, and damages the player upon colliding"""
 
-        if self.rect.colliderect(entity.rect):
+        if self.rect.colliderect(player.rect):
             # Since spikes are always at the bottom, the player must always come from the top
-            entity.rect.bottom = self.rect.top
+            player.rect.bottom = self.rect.top
 
-        if (self.rect.left < entity.rect.left < self.rect.right or self.rect.left < entity.rect.right < self.rect.right) \
-                and self.rect.top == entity.rect.bottom:
-            entity.take_damage(20)
+        if (self.rect.left < player.rect.left < self.rect.right
+            or self.rect.left < player.rect.right < self.rect.right) \
+                and self.rect.top == player.rect.bottom:
+            player.message(EntityMessage.LAND_ON_SPIKE)
 
 
 
@@ -87,19 +91,6 @@ class FallingBlock(Block):
                     self.rect.bottom = colliding_sprite.rect.top
                     self.fallen = True
 
-        # Block should also fall when a pushable block falls on it
-        # Commented this out because it is still buggy - player's state will fluctuate rapidly
-
-        # for pushable in pushable_group:
-        # 	if (self.rect.top == pushable.rect.bottom)\
-        # 		and (self.rect.left < pushable.rect.left < self.rect.right\
-        # 			or self.rect.left < pushable.rect.right < self.rect.right\
-        # 				or self.rect.left < pushable.rect.centerx < self.rect.right):
-        # 		self.blit_rect.y += self.vel
-        # 		self.rect.y = self.blit_rect.y
-        # 		pushable.rect.bottom = self.rect.top
-        # 		pushable.blit_rect.bottom = pushable.rect.bottom
-
 
 class MovingBlock(Block):
     def __init__(self, type_object, x, y):
@@ -134,21 +125,19 @@ class Coin(Block):
 
     def __init__(self, type_object, x, y):
         super().__init__(type_object, x, y)
-        spritesheet = Spritesheet("assets/textures/environment/animated/ruby.png", 1, 16)
-        coin_animation = spritesheet.get_images_at(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
-        self.animation_component = SimpleAnimationComponent(coin_animation)
+        spritesheet = SpriteSheet("assets/textures/environment/animated/ruby.png", 1, 16)
+        coin_animation = Animation.of_entire_sheet(spritesheet)
+        self.animation_component = TerrainAnimationComponent(self, coin_animation)
         self.coin_sound = pg.mixer.Sound("assets/sound/sfx/coin.ogg")
 
     def update(self, entity, *args):
         """Checks if the player has collided with the coin, healing the player if there is a collision,
         and updates the animation of the coin"""
         if pg.sprite.collide_rect(self, entity):
-            if entity.health < 100:
-                entity.health += 20
+            entity.message(EntityMessage.RECEIVE_COIN)
             self.coin_sound.play()
             self.kill()
-
-        self.animation_component.update(self)
+        self.animation_component.update()
 
 
 class LadderBlock(Block):

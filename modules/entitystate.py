@@ -21,12 +21,33 @@ class Direction(Enum):
     LEFT = 0
     RIGHT = 1
 
+    def get_reverse(self):
+        if self is Direction.LEFT:
+            return Direction.RIGHT
+        if self is Direction.RIGHT:
+            return Direction.LEFT
+
 
 class Action(Enum):
     WALK = 0
     STOP = 1
     JUMP = 2
     LAND = 3
+
+
+class EntityMessage(Enum):
+    """Components of Entities communicate with one another via message-passing.
+    The entity receiving the message would carry out the action in the message
+    if it has a Component that is able to carry it out."""
+
+    JUMP = 0
+    RECEIVE_COIN = 1
+    ENEMY_HIT = 2
+    LAND_ON_SPIKE = 3
+    DIE = 4
+    AI_TURN_RIGHT = 5
+    AI_TURN_LEFT = 6
+    DECREMENT_HEALTH = 7
 
 
 class GameEvent(Enum):

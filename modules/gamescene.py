@@ -295,11 +295,9 @@ class GameScene(Scene):
         self.camera = Camera(SURFACE_SIZE, self.level_manager.level.map.rect)
 
         # Initialize player
-        self.player = Player()
+        self.player_starting_position = self.level_manager.level.starting_position
+        self.player = Player(self.player_starting_position)
         self.player_sprite_group = pg.sprite.GroupSingle(self.player)
-
-        self.player.rect.x = self.level_manager.level.starting_position[0]
-        self.player.rect.y = self.level_manager.level.starting_position[1]
 
         # Initialize GUI
         self.hud = HeadsUpDisplay()
@@ -345,15 +343,10 @@ class GameScene(Scene):
                 if not self.can_submit_leaderboard:
                     self.manager.scene.submitted = True
 
-        # Processes the input for the player
-        self.player.handle_input()
-
     def update(self, delta_time):
         self.player.update(delta_time, self.level_manager.level.map)
         self.level_manager.level.update(delta_time, self.player)
         self.hud.update(delta_time, self.player, self.camera)
-
-        # Move camera to player's position
         self.camera.follow_target(self.player)
 
     def render(self, surface):
@@ -361,13 +354,8 @@ class GameScene(Scene):
         for background in self.backgrounds:
             background.render()
 
-        # Draws the map and enemies
         self.level_manager.level.render(self.camera, self.game_display)
-
-        # Draw player on game_display wrt camera position
         self.player.render(self.camera, self.game_display)
-
-        # Draw GUI
         self.hud.render(self.game_display)
 
         # Blit game_display on window surface

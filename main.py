@@ -13,11 +13,6 @@ from modules.gamescene import SceneManager, TitleScene
 def main() -> None:
     """Initialises PyGame and invokes all the necessary functions and modules to run the game"""
 
-    # Initialise sound
-    # pg.mixer.init(44100, 16, 2, 512)
-
-    pg.mixer.pre_init(44100, 16, 2, 512)
-
     # Initialise PyGame
     pg.init()
 
@@ -36,7 +31,8 @@ def main() -> None:
 
     # -------------------- GAME LOOP -------------------- #
     while run:
-        # gets the delta time, capped at 60 fps
+        """Delta time refers to the time difference between the 
+        previous frame that was drawn and the current frame"""
         delta_time = clock.tick(60) / 1000
 
         # Directs the scene to process events in the queue, update its state and render onto the window

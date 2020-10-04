@@ -3,7 +3,8 @@ import json
 from modules.block import Block, FallingBlock, PushableBlock, LadderBlock, SpikeBlock, GatewayBlock, Coin
 from modules.entities import Enemy, PinkGuy, TrashMonster, ToothWalker
 from modules.entitystate import GameEvent, EntityState
-from modules.components import PlayerPhysicsComponent, RenderComponent, EnemyAIInputComponent, EnemyPhysicsComponent
+from modules.component import RenderComponent
+from modules.physics import AIControlComponent
 from modules.textureset import TextureSet
 
 """
@@ -130,7 +131,6 @@ class Map:
             for x in range(len(terrain_layer[0])):
                 code = terrain_layer[y][x]
 
-                # I'm leaving out cloudy boi as it really does not fit the game
                 if code != "  ":
                     if code == "FB":
                         new_block = FallingBlock(texture_set.get_texture_from_code(code),
@@ -207,17 +207,13 @@ class EnemyManager:
                             "Trash Monster": TrashMonster(),
                             "Tooth Walker": ToothWalker()
                            }
-        self.ai = EnemyAIInputComponent()
-        self.physics = EnemyPhysicsComponent()
         self.renderer = RenderComponent()
 
         for enemy_dict in enemies_list:
             self.enemies.add(Enemy(self.enemy_type[enemy_dict["type"]],
-                                   self.ai,
-                                   self.physics,
+                                   AIControlComponent(enemy_dict["coordinates"]),
                                    self.renderer,
-                                   enemy_dict["coordinates"],
-                                   50)
+                                   enemy_dict["coordinates"])
                              )
 
     def update(self, delta_time, map, player):
@@ -230,5 +226,3 @@ class EnemyManager:
     def render(self, camera, surface):
         for entity in self.enemies:
             entity.render(camera, surface)
-
-

@@ -44,7 +44,7 @@ class Healthbar:
 
     def update(self, player):
         """Updates the scaling factor of the health bar in proportion to the current health of the player"""
-        self.scale = player.health / 100
+        self.scale = player.health_component.get_current_health() / player.health_component.get_max_health()
 
     def render(self, surface):
         """Renders the health bar at the top-left corner of the specified surface"""
